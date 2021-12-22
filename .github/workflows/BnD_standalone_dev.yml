@@ -1,7 +1,24 @@
 name: (Standalone | Dev) Build and deploy standalone development build on Itch.io and Telegram
 
 on:
-  workflow_dispatch:
+  workflow_call:
+    inputs:
+      project_name:
+        required: true
+        type: string
+    secrets:
+      TELEGRAM_CHAT_ID:
+        required: true
+      TELEGRAM_TOKEN:
+        required: true
+      UNITY_LICENSE:
+        required: true
+      ITCH_BUTLER_CREDENTIALS:
+        required: true
+      ITCH_GAME:
+        required: true
+      ITCH_USER:
+        required: true
 
 jobs:
   sendTagAnnotations:
