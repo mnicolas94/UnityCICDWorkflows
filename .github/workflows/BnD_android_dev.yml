@@ -6,6 +6,9 @@ on:
       project_name:
         required: true
         type: string
+      development_build:
+        required: true
+        type: bool
     secrets:
       TELEGRAM_CHAT_ID:
         required: true
@@ -32,6 +35,8 @@ jobs:
   sendTagAnnotations:
     name: Send information to Telegram
     runs-on: ubuntu-latest
+    env:
+      
     steps:
       - uses: actions/checkout@v2
         with:
@@ -39,12 +44,18 @@ jobs:
           lfs: true
       # Normal message
       - uses: appleboy/telegram-action@master
+        env:
+          version: $(git describe --tags --abbrev=0 --match v[0-9]*)
+          message_verb: fromJSON('["Releasing", "Building"]')[inputs.development_build]
+          dev_build_parameter: fromJSON('["", "-developmentBuild"]')[inputs.development_build]
+          itch_channel_prefix: fromJSON('["", "dev-"]')[inputs.development_build]
         with:
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
-          message: Builds of ${{ inputs.project_name }} in process.
+          message: ${{ env.message_verb }} "${{ inputs.project_name }}" version ${{ env.version }}.
       # Changes message
       - name: Set changes variable
+        if: inputs.development_build
         id: changes
         run: |
           changes=$(git log $(git describe --tags --abbrev=0)..HEAD --pretty=format:"%s")
@@ -54,11 +65,13 @@ jobs:
           echo "::set-output name=changes::$changes"
           echo "::set-output name=lasttag::$(git describe --tags --abbrev=0)" 
       - uses: appleboy/telegram-action@master
+        if: inputs.development_build
         with:
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
           message: Changes since last dev-release (version ${{ steps.changes.outputs.lasttag }})
       - uses: appleboy/telegram-action@master
+        if: inputs.development_build
         with:
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
@@ -97,7 +110,7 @@ jobs:
           androidKeystorePass: ${{ secrets.ANDROID_KEYSTORE_PASS }}
           androidKeyaliasName: ${{ secrets.ANDROID_KEYALIAS_NAME }}
           androidKeyaliasPass: ${{ secrets.ANDROID_KEYALIAS_PASS }}
-          customParameters: -developmentBuild
+          customParameters: ${{ env.dev_build_parameter }}
       - name: Get version from tag
         id: version
         run: |
@@ -107,7 +120,7 @@ jobs:
       - uses: josephbmanley/butler-publish-itchio-action@master
         env:
           BUTLER_CREDENTIALS: ${{ secrets.ITCH_BUTLER_CREDENTIALS }}
-          CHANNEL: dev-${{ matrix.itch_channel }}
+          CHANNEL: ${{ env.itch_channel_prefix }}${{ matrix.itch_channel }}
           ITCH_GAME: ${{ secrets.ITCH_GAME }}
           ITCH_USER: ${{ secrets.ITCH_USER }}
           PACKAGE: build/Android/${{ inputs.project_name }}.apk
