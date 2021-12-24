@@ -36,8 +36,8 @@ jobs:
     name: Send information to Telegram
     runs-on: ubuntu-latest
     env:
-      dev_build_parameter: ${{ fromJSON('["", "-developmentBuild"]')[inputs.development_build] }}
-      itch_channel_prefix: ${{ fromJSON('["", "dev-"]')[inputs.development_build] }}
+      dev_build_parameter: "-developmentBuild"#${{ fromJSON('["", "-developmentBuild"]')[inputs.development_build] }}
+      itch_channel_prefix: "dev-"#${{ fromJSON('["", "dev-"]')[inputs.development_build] }}
     steps:
       - uses: actions/checkout@v2
         with:
