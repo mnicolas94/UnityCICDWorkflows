@@ -35,9 +35,6 @@ jobs:
   sendTagAnnotations:
     name: Send information to Telegram
     runs-on: ubuntu-latest
-    env:
-      dev_build_parameter: ${{ fromJSON('["", "-developmentBuild"]')[inputs.development_build] }}
-      itch_channel_prefix: ${{ fromJSON('["", "dev-"]')[inputs.development_build] }}
     steps:
       - uses: actions/checkout@v2
         with:
@@ -78,6 +75,9 @@ jobs:
   buildForSomePlatforms:
     name: Build for ${{ matrix.targetPlatform }} with itchio channel ${{ matrix.itch_channel }}
     runs-on: ubuntu-latest
+    env:
+      dev_build_parameter: ${{ fromJSON('["", "-developmentBuild"]')[inputs.development_build] }}
+      itch_channel_prefix: ${{ fromJSON('["", "dev-"]')[inputs.development_build] }}
     strategy:
       fail-fast: false
       matrix:
