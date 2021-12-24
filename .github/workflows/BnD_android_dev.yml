@@ -36,7 +36,8 @@ jobs:
     name: Send information to Telegram
     runs-on: ubuntu-latest
     env:
-      
+      dev_build_parameter: fromJSON('["", "-developmentBuild"]')[inputs.development_build]
+      itch_channel_prefix: fromJSON('["", "dev-"]')[inputs.development_build]
     steps:
       - uses: actions/checkout@v2
         with:
@@ -47,8 +48,6 @@ jobs:
         env:
           version: $(git describe --tags --abbrev=0 --match v[0-9]*)
           message_verb: fromJSON('["Releasing", "Building"]')[inputs.development_build]
-          dev_build_parameter: fromJSON('["", "-developmentBuild"]')[inputs.development_build]
-          itch_channel_prefix: fromJSON('["", "dev-"]')[inputs.development_build]
         with:
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
