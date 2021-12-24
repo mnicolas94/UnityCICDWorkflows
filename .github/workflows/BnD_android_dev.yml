@@ -36,8 +36,8 @@ jobs:
     name: Send information to Telegram
     runs-on: ubuntu-latest
     env:
-      dev_build_parameter: "-developmentBuild"
-      itch_channel_prefix: "dev-"
+      dev_build_parameter: -developmentBuild
+      itch_channel_prefix: dev-
     steps:
       - uses: actions/checkout@v2
         with:
