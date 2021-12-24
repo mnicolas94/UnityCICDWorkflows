@@ -36,33 +36,31 @@ jobs:
     name: Send information to Telegram
     runs-on: ubuntu-latest
     env:
-      dev_build_parameter: fromJSON('["", "-developmentBuild"]')[inputs.development_build]
-      itch_channel_prefix: fromJSON('["", "dev-"]')[inputs.development_build]
+      dev_build_parameter: ${{ fromJSON('["", "-developmentBuild"]')[inputs.development_build] }}
+      itch_channel_prefix: ${{ fromJSON('["", "dev-"]')[inputs.development_build] }}
     steps:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
           lfs: true
+      - name: Set changes variable
+      id: changes
+      run: |
+        changes=$(git log $(git describe --tags --abbrev=0)..HEAD --pretty=format:"%s")
+        changes="${changes//'%'/'%25'}"
+        changes="${changes//$'\n'/'%0A'}"
+        changes="${changes//$'\r'/'%0D'}"
+        echo "::set-output name=changes::$changes"
+        echo "::set-output name=lasttag::$(git describe --tags --abbrev=0)"
       # Normal message
       - uses: appleboy/telegram-action@master
         env:
-          version: ${{ git describe --tags --abbrev=0 --match v[0-9]* }}
           message_verb: ${{ fromJSON('["Releasing", "Building"]')[inputs.development_build] }}
         with:
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
-          message: ${{ env.message_verb }} "${{ inputs.project_name }}" version ${{ env.version }}.
+          message: ${{ env.message_verb }} "${{ inputs.project_name }}" version ${{ steps.changes.outputs.lasttag }}.
       # Changes message
-      - name: Set changes variable
-        if: inputs.development_build
-        id: changes
-        run: |
-          changes=$(git log $(git describe --tags --abbrev=0)..HEAD --pretty=format:"%s")
-          changes="${changes//'%'/'%25'}"
-          changes="${changes//$'\n'/'%0A'}"
-          changes="${changes//$'\r'/'%0D'}"
-          echo "::set-output name=changes::$changes"
-          echo "::set-output name=lasttag::$(git describe --tags --abbrev=0)" 
       - uses: appleboy/telegram-action@master
         if: inputs.development_build
         with:
