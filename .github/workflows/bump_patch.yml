@@ -1,8 +1,7 @@
-name: Bump version patch on push to dev branch
+name: Bump version patch
 
 on:
-  push:
-    branches: [ dev, develop ]
+  workflow_call:
     
 jobs:
   bumpPatch:

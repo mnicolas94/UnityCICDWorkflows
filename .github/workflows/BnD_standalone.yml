@@ -6,6 +6,9 @@ on:
       project_name:
         required: true
         type: string
+      development_build:
+        required: true
+        type: boolean
     secrets:
       TELEGRAM_CHAT_ID:
         required: true
@@ -29,13 +32,6 @@ jobs:
         with:
           fetch-depth: 0
           lfs: true
-      # Normal message
-      - uses: appleboy/telegram-action@master
-        with:
-          to: ${{ secrets.TELEGRAM_CHAT_ID }}
-          token: ${{ secrets.TELEGRAM_TOKEN }}
-          message: Builds of ${{ secrets.UNITY_PROJECT_NAME }} in process.
-      # Changes message
       - name: Set changes variable
         id: changes
         run: |
@@ -44,13 +40,24 @@ jobs:
           changes="${changes//$'\n'/'%0A'}"
           changes="${changes//$'\r'/'%0D'}"
           echo "::set-output name=changes::$changes"
-          echo "::set-output name=lasttag::$(git describe --tags --abbrev=0)" 
+          echo "::set-output name=lasttag::$(git describe --tags --abbrev=0)"
+      # Normal message
       - uses: appleboy/telegram-action@master
+        env:
+          message_verb: ${{ fromJSON('["Releasing", "Building"]')[inputs.development_build] }}
+        with:
+          to: ${{ secrets.TELEGRAM_CHAT_ID }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: ${{ env.message_verb }} "${{ inputs.project_name }}" version ${{ steps.changes.outputs.lasttag }}.
+      # Changes message
+      - uses: appleboy/telegram-action@master
+        if: inputs.development_build
         with:
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
           message: Changes since last dev-release (version ${{ steps.changes.outputs.lasttag }})
       - uses: appleboy/telegram-action@master
+        if: inputs.development_build
         with:
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
@@ -60,6 +67,9 @@ jobs:
   buildForSomePlatforms:
     name: Build for ${{ matrix.targetPlatform }} with itchio channel ${{ matrix.itch_channel }}
     runs-on: ubuntu-latest
+    env:
+      dev_build_parameter: ${{ fromJSON('["", "-developmentBuild"]')[inputs.development_build] }}
+      itch_channel_prefix: ${{ fromJSON('["", "dev-"]')[inputs.development_build] }}
     strategy:
       fail-fast: false
       matrix:
@@ -84,11 +94,11 @@ jobs:
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         with:
-          buildName: ${{ secrets.UNITY_PROJECT_NAME }}
+          buildName: ${{ inputs.project_name }}
           buildMethod: UnityBuilderAction.BuildScript.Build
           targetPlatform: ${{ matrix.targetPlatform }}
           versioning: None
-          customParameters: -developmentBuild
+          customParameters: ${{ env.dev_build_parameter }}
       - name: Get version from tag
         id: version
         run: |
@@ -105,7 +115,7 @@ jobs:
       - uses: josephbmanley/butler-publish-itchio-action@master
         env:
           BUTLER_CREDENTIALS: ${{ secrets.ITCH_BUTLER_CREDENTIALS }}
-          CHANNEL: dev-${{ matrix.itch_channel }}
+          CHANNEL: ${{ env.itch_channel_prefix }}${{ matrix.itch_channel }}
           ITCH_GAME: ${{ secrets.ITCH_GAME }}
           ITCH_USER: ${{ secrets.ITCH_USER }}
           PACKAGE: renamed
