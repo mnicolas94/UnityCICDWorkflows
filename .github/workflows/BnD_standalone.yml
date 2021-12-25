@@ -2,14 +2,12 @@ name: (Standalone | Dev) Build and deploy standalone development build on Itch.i
 
 on:
   workflow_call:
-    inputs:
-      project_name:
-        required: true
-        type: string
       development_build:
         required: true
         type: boolean
     secrets:
+      PROJECT_NAME:
+        required: true
       TELEGRAM_CHAT_ID:
         required: true
       TELEGRAM_TOKEN:
@@ -48,7 +46,7 @@ jobs:
         with:
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
-          message: ${{ env.message_verb }} "${{ inputs.project_name }}" version ${{ steps.changes.outputs.lasttag }}.
+          message: ${{ env.message_verb }} "${{ secrets.PROJECT_NAME }}" version ${{ steps.changes.outputs.lasttag }}.
       # Changes message
       - uses: appleboy/telegram-action@master
         if: inputs.development_build
@@ -94,7 +92,7 @@ jobs:
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         with:
-          buildName: ${{ inputs.project_name }}
+          buildName: ${{ secrets.PROJECT_NAME }}
           buildMethod: UnityBuilderAction.BuildScript.Build
           targetPlatform: ${{ matrix.targetPlatform }}
           versioning: None
