@@ -2,6 +2,7 @@ name: (Standalone | Dev) Build and deploy standalone development build on Itch.i
 
 on:
   workflow_call:
+    inputs:
       development_build:
         required: true
         type: boolean
