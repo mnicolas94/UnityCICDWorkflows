@@ -42,6 +42,7 @@ jobs:
       - name: Get variables
         id: variables
         run: |
+          dir
           changes=$(git log $(git describe --tags --abbrev=0)..HEAD --pretty=format:"%s")
           changes="${changes//'%'/'%25'}"
           changes="${changes//$'\n'/'%0A'}"
