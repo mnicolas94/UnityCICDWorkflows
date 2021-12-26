@@ -7,8 +7,6 @@ on:
         required: true
         type: boolean
     secrets:
-      PROJECT_NAME:
-        required: true
       TELEGRAM_CHAT_ID:
         required: true
       TELEGRAM_TOKEN:
@@ -31,15 +29,18 @@ jobs:
         with:
           fetch-depth: 0
           lfs: true
-      - name: Set changes variable
-        id: changes
+      - name: Get variables
+        id: variables
         run: |
           changes=$(git log $(git describe --tags --abbrev=0)..HEAD --pretty=format:"%s")
           changes="${changes//'%'/'%25'}"
           changes="${changes//$'\n'/'%0A'}"
           changes="${changes//$'\r'/'%0D'}"
+          chmod +x ./.github/workflows/getname.sh
+          projectname=$(./.github/workflows/getname.sh)
           echo "::set-output name=changes::$changes"
           echo "::set-output name=lasttag::$(git describe --tags --abbrev=0)"
+          echo "::set-output name=projectname::$projectname"
       # Normal message
       - uses: appleboy/telegram-action@master
         env:
@@ -47,20 +48,20 @@ jobs:
         with:
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
-          message: ${{ env.message_verb }} "${{ secrets.PROJECT_NAME }}" version ${{ steps.changes.outputs.lasttag }}.
+          message: ${{ env.message_verb }} "${{ steps.variables.outputs.projectname }}" version ${{ steps.variables.outputs.lasttag }}.
       # Changes message
       - uses: appleboy/telegram-action@master
         if: inputs.development_build
         with:
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
-          message: Changes since last dev-release (version ${{ steps.changes.outputs.lasttag }})
+          message: Changes since last dev-release (version ${{ steps.variables.outputs.lasttag }})
       - uses: appleboy/telegram-action@master
         if: inputs.development_build
         with:
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
-          message: ${{ steps.changes.outputs.changes }}
+          message: ${{ steps.variables.outputs.changes }}
           
           
   buildForSomePlatforms:
@@ -89,28 +90,31 @@ jobs:
           path: Library
           key: Library-${{ matrix.targetPlatform }}
           restore-keys: Library-
+      - name: Get variables
+        id: variables
+        run: |
+          chmod +x ./.github/workflows/getname.sh
+          projectname=$(./.github/workflows/getname.sh)
+          version=$(git describe --tags --abbrev=0 --match v[0-9]*)
+          version=${version:1}
+          echo "::set-output name=version::$version"
+          echo "::set-output name=projectname::$projectname"
       - uses: game-ci/unity-builder@v2
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         with:
-          buildName: ${{ secrets.PROJECT_NAME }}
+          buildName: ${{ steps.variables.outputs.projectname }}
           buildMethod: UnityBuilderAction.BuildScript.Build
           targetPlatform: ${{ matrix.targetPlatform }}
           versioning: None
           customParameters: ${{ env.dev_build_parameter }}
-      - name: Get version from tag
-        id: version
-        run: |
-          version=$(git describe --tags --abbrev=0 --match v[0-9]*)
-          version=${version:1}
-          echo "::set-output name=version::$version"
       - name: Rename game folder
         id: renaming
         run: |
           mkdir renamed
           cp -r build/${{ matrix.targetPlatform }} renamed
-          mv renamed/${{ matrix.targetPlatform }} renamed/${{ secrets.PROJECT_NAME }}
-          echo "::set-output name=zipName::${{ secrets.PROJECT_NAME }}-${{ matrix.itch_channel }}-${{ steps.version.outputs.version }}.zip"
+          mv renamed/${{ matrix.targetPlatform }} renamed/${{ steps.variables.outputs.projectname }}
+          echo "::set-output name=zipName::${{ steps.variables.outputs.projectname }}-${{ matrix.itch_channel }}-${{ steps.variables.outputs.version }}.zip"
       - uses: josephbmanley/butler-publish-itchio-action@master
         env:
           BUTLER_CREDENTIALS: ${{ secrets.ITCH_BUTLER_CREDENTIALS }}
@@ -118,7 +122,7 @@ jobs:
           ITCH_GAME: ${{ secrets.ITCH_GAME }}
           ITCH_USER: ${{ secrets.ITCH_USER }}
           PACKAGE: renamed
-          VERSION: ${{ steps.version.outputs.version }}
+          VERSION: ${{ steps.variables.outputs.version }}
       - uses: papeloto/action-zip@v1
         with:
           files: renamed
@@ -140,15 +144,3 @@ jobs:
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
           message: All builds completed succesfully.
-          
-  sendErrorInformation:
-    name: Send error if build fail
-    needs: buildForSomePlatforms
-    if: needs.buildForSomePlatforms.result == 'failure'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: appleboy/telegram-action@master
-        with:
-          to: ${{ secrets.TELEGRAM_CHAT_ID }}
-          token: ${{ secrets.TELEGRAM_TOKEN }}
-          message: Some error ocurred during build.

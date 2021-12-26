@@ -7,8 +7,6 @@ on:
         required: true
         type: boolean
     secrets:
-      PROJECT_NAME:
-        required: true
       TELEGRAM_CHAT_ID:
         required: true
       TELEGRAM_TOKEN:
@@ -42,7 +40,6 @@ jobs:
       - name: Get variables
         id: variables
         run: |
-          dir
           changes=$(git log $(git describe --tags --abbrev=0)..HEAD --pretty=format:"%s")
           changes="${changes//'%'/'%25'}"
           changes="${changes//$'\n'/'%0A'}"
@@ -97,11 +94,20 @@ jobs:
           path: Library
           key: Library-${{ matrix.targetPlatform }}
           restore-keys: Library-
+      - name: Get variables
+        id: variables
+        run: |
+          chmod +x ./.github/workflows/getname.sh
+          projectname=$(./.github/workflows/getname.sh)
+          version=$(git describe --tags --abbrev=0 --match v[0-9]*)
+          version=${version:1}
+          echo "::set-output name=version::$version"
+          echo "::set-output name=projectname::$projectname"
       - uses: game-ci/unity-builder@v2
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         with:
-          buildName: ${{ secrets.PROJECT_NAME }}
+          buildName: ${{ steps.variables.outputs.projectname }}
           buildMethod: UnityBuilderAction.BuildScript.Build
           targetPlatform: ${{ matrix.targetPlatform }}
           versioning: None
@@ -111,26 +117,20 @@ jobs:
           androidKeyaliasName: ${{ secrets.ANDROID_KEYALIAS_NAME }}
           androidKeyaliasPass: ${{ secrets.ANDROID_KEYALIAS_PASS }}
           customParameters: ${{ env.dev_build_parameter }}
-      - name: Get version from tag
-        id: version
-        run: |
-          version=$(git describe --tags --abbrev=0 --match v[0-9]*)
-          version=${version:1}
-          echo "::set-output name=version::$version"
       - uses: josephbmanley/butler-publish-itchio-action@master
         env:
           BUTLER_CREDENTIALS: ${{ secrets.ITCH_BUTLER_CREDENTIALS }}
           CHANNEL: ${{ env.itch_channel_prefix }}${{ matrix.itch_channel }}
           ITCH_GAME: ${{ secrets.ITCH_GAME }}
           ITCH_USER: ${{ secrets.ITCH_USER }}
-          PACKAGE: build/Android/${{ secrets.PROJECT_NAME }}.apk
-          VERSION: ${{ steps.version.outputs.version }}
+          PACKAGE: build/Android/${{ steps.variables.outputs.projectname }}.apk
+          VERSION: ${{ steps.variables.outputs.version }}
       - uses: appleboy/telegram-action@master
         with:
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
           message: Build for ${{ matrix.itch_channel }} completed
-          document: build/Android/${{ secrets.PROJECT_NAME }}.apk
+          document: build/Android/${{ steps.variables.outputs.projectname }}.apk
   
   sendFinalInformation:
     name: Send final information to Telegram
