@@ -112,8 +112,8 @@ jobs:
         id: renaming
         run: |
           mkdir renamed
-          cp -r build/${{ matrix.targetPlatform }} renamed
-          mv renamed/${{ matrix.targetPlatform }} renamed/${{ steps.variables.outputs.projectname }}
+          cp -r "build/${{ matrix.targetPlatform }}" renamed
+          mv "renamed/${{ matrix.targetPlatform }}" "renamed/${{ steps.variables.outputs.projectname }}"
           echo "::set-output name=zipName::${{ steps.variables.outputs.projectname }}-${{ matrix.itch_channel }}-${{ steps.variables.outputs.version }}.zip"
       - uses: josephbmanley/butler-publish-itchio-action@master
         env:
