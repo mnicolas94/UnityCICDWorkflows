@@ -31,11 +31,11 @@ on:
 jobs:
   run:
     uses: mnicolas94/UnityCICDWorkflows/.github/workflows/telegram_init_build_message.yml@v1-pre-7
-      with:
-        development_build: true
-      secrets:
-        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-        TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+    with:
+      development_build: true
+    secrets:
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           
   buildForSomePlatforms:
     name: Build for ${{ matrix.targetPlatform }} with itchio channel ${{ matrix.itch_channel }}
