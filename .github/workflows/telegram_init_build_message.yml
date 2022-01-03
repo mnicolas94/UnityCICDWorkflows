@@ -1,56 +1,49 @@
-﻿name: Send message to telegram on build started
-
-on:
-  workflow_call:
-    inputs:
-      development_build:
-        required: true
-        type: boolean
-    secrets:
-      TELEGRAM_CHAT_ID:
-        required: true
-      TELEGRAM_TOKEN:
-        required: true
-
-jobs:
-  sendTagAnnotations:
-    name: Send information to Telegram
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-          lfs: true
-      - name: Get variables
-        id: variables
-        run: |
-          changes=$(git log $(git describe --tags --abbrev=0)..HEAD --pretty=format:"%s")
-          changes="${changes//'%'/'%25'}"
-          changes="${changes//$'\n'/'%0A'}"
-          changes="${changes//$'\r'/'%0D'}"
-          chmod +x ./.github/workflows/getname.sh
-          projectname=$(./.github/workflows/getname.sh)
-          echo "::set-output name=changes::$changes"
-          echo "::set-output name=lasttag::$(git describe --tags --abbrev=0)"
-          echo "::set-output name=projectname::$projectname"
-      # Normal message
-      - uses: appleboy/telegram-action@master
-        env:
-          message_verb: ${{ fromJSON('["Releasing", "Building"]')[inputs.development_build] }}
-        with:
-          to: ${{ secrets.TELEGRAM_CHAT_ID }}
-          token: ${{ secrets.TELEGRAM_TOKEN }}
-          message: ${{ env.message_verb }} "${{ steps.variables.outputs.projectname }}" version ${{ steps.variables.outputs.lasttag }}.
-      # Changes message
-      - uses: appleboy/telegram-action@master
-        if: inputs.development_build
-        with:
-          to: ${{ secrets.TELEGRAM_CHAT_ID }}
-          token: ${{ secrets.TELEGRAM_TOKEN }}
-          message: Changes since last dev-release (version ${{ steps.variables.outputs.lasttag }})
-      - uses: appleboy/telegram-action@master
-        if: inputs.development_build
-        with:
-          to: ${{ secrets.TELEGRAM_CHAT_ID }}
-          token: ${{ secrets.TELEGRAM_TOKEN }}
-          message: ${{ steps.variables.outputs.changes }}
+﻿name: 'Send message to telegram on build started'
+  inputs:
+    development_build:
+      required: true
+      type: boolean
+    TELEGRAM_CHAT_ID:
+      required: true
+    TELEGRAM_TOKEN:
+      required: true
+runs:
+  using: composite
+  steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+        lfs: true
+    - name: Get variables
+      id: variables
+      run: |
+        changes=$(git log $(git describe --tags --abbrev=0)..HEAD --pretty=format:"%s")
+        changes="${changes//'%'/'%25'}"
+        changes="${changes//$'\n'/'%0A'}"
+        changes="${changes//$'\r'/'%0D'}"
+        chmod +x ./.github/workflows/getname.sh
+        projectname=$(./.github/workflows/getname.sh)
+        echo "::set-output name=changes::$changes"
+        echo "::set-output name=lasttag::$(git describe --tags --abbrev=0)"
+        echo "::set-output name=projectname::$projectname"
+    # Normal message
+    - uses: appleboy/telegram-action@master
+      env:
+        message_verb: ${{ fromJSON('["Releasing", "Building"]')[inputs.development_build] }}
+      with:
+        to: ${{ secrets.TELEGRAM_CHAT_ID }}
+        token: ${{ secrets.TELEGRAM_TOKEN }}
+        message: ${{ env.message_verb }} "${{ steps.variables.outputs.projectname }}" version ${{ steps.variables.outputs.lasttag }}.
+    # Changes message
+    - uses: appleboy/telegram-action@master
+      if: inputs.development_build
+      with:
+        to: ${{ secrets.TELEGRAM_CHAT_ID }}
+        token: ${{ secrets.TELEGRAM_TOKEN }}
+        message: Changes since last dev-release (version ${{ steps.variables.outputs.lasttag }})
+    - uses: appleboy/telegram-action@master
+      if: inputs.development_build
+      with:
+        to: ${{ secrets.TELEGRAM_CHAT_ID }}
+        token: ${{ secrets.TELEGRAM_TOKEN }}
+        message: ${{ steps.variables.outputs.changes }}
