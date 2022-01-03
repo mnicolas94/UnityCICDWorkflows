@@ -43,10 +43,10 @@ jobs:
             itch_channel: android
     steps:
       - uses: mnicolas94/UnityCICDWorkflows/.github/workflows/telegram_init_build_message.yml
-          with:
-            development_build: true
-            TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-            TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+        with:
+          development_build: true
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
