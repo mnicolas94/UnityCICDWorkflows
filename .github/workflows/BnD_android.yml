@@ -1,4 +1,4 @@
-﻿name: (Android | Dev) Build and deploy android development build on Itch.io and Telegram
+﻿name: Android build and deploy android development build on Itch.io and Telegram
 
 on:
   workflow_call:
