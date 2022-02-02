@@ -104,7 +104,7 @@ jobs:
           echo "::set-output name=projectname::$projectname"
       - name: Download build script
         run: |
-          curl 'https://raw.githubusercontent.com/mnicolas94/UnityCICDWorkflows/main/BuildScript.cs' > Assets/Editor/BuildScript.cs
+          curl 'https://raw.githubusercontent.com/mnicolas94/UnityCICDWorkflows/main/BuildScriptTest.cs' > Assets/Editor/BuildScriptTest.cs
           cd Assets
           cd Editor
           ls
