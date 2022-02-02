@@ -7,18 +7,17 @@ using UnityEditor.AddressableAssets;
 using UnityEditor.AddressableAssets.Settings;
 using UnityEditor.Build.Reporting;
 
-namespace BuilderNamespaceTest
+namespace UnityBuilderAction
 {
-    public static class BuildScriptTest
+    public static class BuildScript
     {
         private static readonly string Eol = Environment.NewLine;
 
         private static readonly string[] Secrets =
             {"androidKeystorePass", "androidKeyaliasName", "androidKeyaliasPass"};
 
-        public static void BuildTest()
+        public static void Build()
         {
-            Console.WriteLine("******** Building from test build script **************");
             // Gather values from args
             Dictionary<string, string> options = GetValidatedOptions();
 

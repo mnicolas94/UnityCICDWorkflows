@@ -102,6 +102,10 @@ jobs:
           version=${version:1}
           echo "::set-output name=version::$version"
           echo "::set-output name=projectname::$projectname"
+      - name: Download build script
+        run: |
+          mkdir -p Assets/Editor
+          curl 'https://raw.githubusercontent.com/mnicolas94/UnityCICDWorkflows/main/BuildScript.cs' > Assets/Editor/BuildScript.cs
       - uses: game-ci/unity-builder@v2
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
