@@ -18,6 +18,7 @@ namespace BuilderNamespaceTest
 
         public static void BuildTest()
         {
+            Console.WriteLine("******** Building from test build script **************");
             // Gather values from args
             Dictionary<string, string> options = GetValidatedOptions();
 
