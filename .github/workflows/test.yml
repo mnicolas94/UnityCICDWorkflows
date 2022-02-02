@@ -1,0 +1,151 @@
+﻿name: Android build and deploy android development build on Itch.io and Telegram
+
+on:
+  workflow_call:
+    inputs:
+      development_build:
+        required: true
+        type: boolean
+    secrets:
+      TELEGRAM_CHAT_ID:
+        required: true
+      TELEGRAM_TOKEN:
+        required: true
+      UNITY_LICENSE:
+        required: true
+      ANDROID_KEYSTORE_BASE64:
+        required: true
+      ANDROID_KEYSTORE_PASS:
+        required: true
+      ANDROID_KEYALIAS_NAME:
+        required: true
+      ANDROID_KEYALIAS_PASS:
+        required: true
+      ITCH_BUTLER_CREDENTIALS:
+        required: true
+      ITCH_GAME:
+        required: true
+      ITCH_USER:
+        required: true
+
+jobs:
+  sendTagAnnotations:
+    name: Send information to Telegram
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          lfs: true
+      - name: Get variables
+        id: variables
+        run: |
+          changes=$(git log $(git describe --tags --abbrev=0)..HEAD --pretty=format:"%s")
+          changes="${changes//'%'/'%25'}"
+          changes="${changes//$'\n'/'%0A'}"
+          changes="${changes//$'\r'/'%0D'}"
+          chmod +x ./.github/workflows/getname.sh
+          projectname=$(./.github/workflows/getname.sh)
+          echo "::set-output name=changes::$changes"
+          echo "::set-output name=lasttag::$(git describe --tags --abbrev=0)"
+          echo "::set-output name=projectname::$projectname"
+      # Normal message
+      - uses: appleboy/telegram-action@master
+        env:
+          message_verb: ${{ fromJSON('["Releasing", "Building"]')[inputs.development_build] }}
+        with:
+          to: ${{ secrets.TELEGRAM_CHAT_ID }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: ${{ env.message_verb }} "${{ steps.variables.outputs.projectname }}" version ${{ steps.variables.outputs.lasttag }}.
+      # Changes message
+      - uses: appleboy/telegram-action@master
+        if: inputs.development_build
+        with:
+          to: ${{ secrets.TELEGRAM_CHAT_ID }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: Changes since last dev-release (version ${{ steps.variables.outputs.lasttag }})
+      - uses: appleboy/telegram-action@master
+        if: inputs.development_build
+        with:
+          to: ${{ secrets.TELEGRAM_CHAT_ID }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: ${{ steps.variables.outputs.changes }}
+
+  buildForSomePlatforms:
+    name: Build for ${{ matrix.targetPlatform }} with itchio channel ${{ matrix.itch_channel }}
+    runs-on: ubuntu-latest
+    env:
+      dev_build_parameter: ${{ fromJSON('["", "-developmentBuild"]')[inputs.development_build] }}
+      itch_channel_prefix: ${{ fromJSON('["", "dev-"]')[inputs.development_build] }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - targetPlatform: Android
+            itch_channel: android
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          lfs: true
+      - uses: actions/cache@v2
+        with:
+          path: Library
+          key: Library-${{ matrix.targetPlatform }}
+          restore-keys: Library-
+      - name: Get variables
+        id: variables
+        run: |
+          chmod +x ./.github/workflows/getname.sh
+          projectname=$(./.github/workflows/getname.sh)
+          version=$(git describe --tags --abbrev=0 --match v[0-9]*)
+          version=${version:1}
+          echo "::set-output name=version::$version"
+          echo "::set-output name=projectname::$projectname"
+      - name: Download build script
+        run: |
+          curl 'https://raw.githubusercontent.com/mnicolas94/UnityCICDWorkflows/main/BuildScript.cs' > Assets/Editor/BuildScript.cs
+          cd Assets
+          cd Editor
+          ls
+          cd..
+          cd..
+      - uses: game-ci/unity-builder@v2
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        with:
+          buildName: ${{ steps.variables.outputs.projectname }}
+          buildMethod: BuilderNamespaceTest.BuildScriptTest.BuildTest
+          targetPlatform: ${{ matrix.targetPlatform }}
+          versioning: Tag
+          androidKeystoreName: user.keystore
+          androidKeystoreBase64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          androidKeystorePass: ${{ secrets.ANDROID_KEYSTORE_PASS }}
+          androidKeyaliasName: ${{ secrets.ANDROID_KEYALIAS_NAME }}
+          androidKeyaliasPass: ${{ secrets.ANDROID_KEYALIAS_PASS }}
+          customParameters: ${{ env.dev_build_parameter }}
+      - uses: josephbmanley/butler-publish-itchio-action@master
+        env:
+          BUTLER_CREDENTIALS: ${{ secrets.ITCH_BUTLER_CREDENTIALS }}
+          CHANNEL: ${{ env.itch_channel_prefix }}${{ matrix.itch_channel }}
+          ITCH_GAME: ${{ secrets.ITCH_GAME }}
+          ITCH_USER: ${{ secrets.ITCH_USER }}
+          PACKAGE: build/Android/${{ steps.variables.outputs.projectname }}.apk
+          VERSION: ${{ steps.variables.outputs.version }}
+      - uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_CHAT_ID }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: Build for ${{ matrix.itch_channel }} completed
+          document: build/Android/${{ steps.variables.outputs.projectname }}.apk
+
+  sendFinalInformation:
+    name: Send final information to Telegram
+    needs: buildForSomePlatforms
+    runs-on: ubuntu-latest
+    steps:
+      - uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_CHAT_ID }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: All builds completed succesfully.
