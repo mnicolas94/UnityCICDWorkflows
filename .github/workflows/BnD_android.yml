@@ -130,7 +130,7 @@ jobs:
           ls
           cd Android
           ls
-          mv oldfilename newfilename
+          mv $oldfilename $newfilename
           echo "::set-output name=filename::$newfilename"
       - uses: josephbmanley/butler-publish-itchio-action@master
         env:
