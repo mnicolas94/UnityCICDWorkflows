@@ -126,9 +126,8 @@ jobs:
           oldfilename="build/Android/${{ steps.variables.outputs.projectname }}.apk"
           newfilename="build/Android/${{ steps.variables.outputs.projectname }} ${{ steps.variables.outputs.version }}.apk"
           newfilenameasd="build/${{ steps.variables.outputs.projectname }} ${{ steps.variables.outputs.version }}.apk"
-          cp "$oldfilename" "$newfilenameasd"
           sudo mv "$oldfilename" "$newfilename"
-          sudo cp "$oldfilename" "$newfilename"
+          sudo cp "$oldfilename" "$newfilenameasd"
           echo "::set-output name=filename::$newfilename"
       - uses: josephbmanley/butler-publish-itchio-action@master
         env:
