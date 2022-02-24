@@ -125,7 +125,7 @@ jobs:
         run: |
           oldfilename="build/Android/${{ steps.variables.outputs.projectname }}.apk"
           newfilename="build/Android/${{ steps.variables.outputs.projectname }} ${{ steps.variables.outputs.version }}.apk"
-          mv "$oldfilename" "$newfilename"
+          cp "$oldfilename" "$newfilename"
           echo "::set-output name=filename::$newfilename"
       - uses: josephbmanley/butler-publish-itchio-action@master
         env:
