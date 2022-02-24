@@ -125,6 +125,11 @@ jobs:
         run: |
           oldfilename="build/Android/${{ steps.variables.outputs.projectname }}.apk"
           newfilename="build/Android/${{ steps.variables.outputs.projectname }} ${{ steps.variables.outputs.version }}.apk"
+          ls
+          cd build
+          ls
+          cd Android
+          ls
           mv oldfilename newfilename
           echo "::set-output name=filename::$newfilename"
       - uses: josephbmanley/butler-publish-itchio-action@master
