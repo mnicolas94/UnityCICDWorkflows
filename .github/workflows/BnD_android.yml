@@ -120,20 +120,27 @@ jobs:
           androidKeyaliasName: ${{ secrets.ANDROID_KEYALIAS_NAME }}
           androidKeyaliasPass: ${{ secrets.ANDROID_KEYALIAS_PASS }}
           customParameters: ${{ env.dev_build_parameter }}
+      -name: Add version to file name
+        id: version_in_name
+        run: |
+          oldfilename=build/Android/${{ steps.variables.outputs.projectname }}.apk
+          newfilename=build/Android/${{ steps.variables.outputs.projectname }} ${{ steps.variables.outputs.version }}.apk
+          rename oldfilename newfilename
+          echo "::set-output name=filename::$newfilename"
       - uses: josephbmanley/butler-publish-itchio-action@master
         env:
           BUTLER_CREDENTIALS: ${{ secrets.ITCH_BUTLER_CREDENTIALS }}
           CHANNEL: ${{ env.itch_channel_prefix }}${{ matrix.itch_channel }}
           ITCH_GAME: ${{ secrets.ITCH_GAME }}
           ITCH_USER: ${{ secrets.ITCH_USER }}
-          PACKAGE: build/Android/${{ steps.variables.outputs.projectname }}.apk
+          PACKAGE: ${{ steps.version_in_name.outputs.filename }}
           VERSION: ${{ steps.variables.outputs.version }}
       - uses: appleboy/telegram-action@master
         with:
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
           message: Build for ${{ matrix.itch_channel }} completed
-          document: build/Android/${{ steps.variables.outputs.projectname }}.apk
+          document: ${{ steps.version_in_name.outputs.filename }}
   
   sendFinalInformation:
     name: Send final information to Telegram
