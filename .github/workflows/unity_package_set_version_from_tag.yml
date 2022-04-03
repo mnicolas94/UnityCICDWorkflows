@@ -39,6 +39,7 @@ jobs:
 
                 with open(json_path, "w") as f:
                   json.dump(js, f, indent=2)
+      - uses: fregante/setup-git-user@v1
       - name: push version file
         run: |
           git commit -m "update package.json version" ./package.json
