@@ -1,0 +1,46 @@
+﻿name: Set version to package.json
+
+on:
+  workflow_call:
+
+jobs:
+  setVersion:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v2
+      - uses: jannekem/run-python-script-action@v1
+        with:
+          script: |
+            import json
+            import subprocess
+            
+            def get_last_version():
+                bash_command = "git describe --tags --abbrev=0 --match v[0-9]*"
+                process = subprocess.Popen(bash_command.split(), stdout=subprocess.PIPE)
+                output, error = process.communicate()
+                outputstr = str(output)
+                outputstr = outputstr[3:-3]  # "b'vXX.XX.XX\\n'" becomes "XX.XX.XX"
+                outputstr = outputstr.replace('-', '.')
+                major, minor, patch, *_ = outputstr.split('.')
+                ver = f'{major}.{minor}.{patch}'
+                return ver
+
+            if __name__ == '__main__':
+                json_path = "package.json"
+                with open(json_path) as f:
+                  js = json.load(f)
+            
+                version = get_last_version()
+                js['version'] = version
+
+                with open(json_path, "w") as f:
+                  json.dump(js, f, indent=4)
+      - name: push version file
+        run: |
+          git commit -m "update package.json version" ./package.json
+          git push
+          
