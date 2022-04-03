@@ -38,7 +38,7 @@ jobs:
                 js['version'] = version
 
                 with open(json_path, "w") as f:
-                  json.dump(js, f, indent=4)
+                  json.dump(js, f, indent=2)
       - name: push version file
         run: |
           git commit -m "update package.json version" ./package.json
