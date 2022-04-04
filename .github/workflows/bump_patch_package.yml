@@ -78,6 +78,6 @@ jobs:
           if [[ ${ steps.version.outputs.is_new } == 'false' ]]; then
             git tag -d $version
             git push --delete origin $version
+          fi
           git tag $version
           git push --all
-          
