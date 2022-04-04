@@ -60,7 +60,7 @@ jobs:
                 with open(json_path) as f:
                   js = json.load(f)
             
-                version = ${{ steps.version.outputs.version }}
+                version = "${{ steps.version.outputs.version }}"
                 is_same_version = js['version'] == version
                 js['version'] = version
 
