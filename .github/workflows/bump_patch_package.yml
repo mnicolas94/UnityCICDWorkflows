@@ -57,6 +57,7 @@ jobs:
 
             if __name__ == '__main__':
                 json_path = "package.json"
+                with open(json_path) as f:
                   js = json.load(f)
             
                 version = ${{ steps.version.outputs.version }}
@@ -66,7 +67,6 @@ jobs:
                 with open(json_path, "w") as f:
                   json.dump(js, f, indent=2)
             
-                print(f"version = {version}")
                 print(is_same_version)
             
       - uses: fregante/setup-git-user@v1
