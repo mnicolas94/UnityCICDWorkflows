@@ -80,4 +80,4 @@ jobs:
             git push --delete origin $version
           fi
           git tag $version
-          git push --all
+          git push origin --all
