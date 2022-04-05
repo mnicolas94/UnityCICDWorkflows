@@ -140,10 +140,10 @@ jobs:
       - name: Send error message if failed
         if: ${{ failure() }}
         uses: appleboy/telegram-action@master
-          with:
-            to: ${{ secrets.TELEGRAM_CHAT_ID }}
-            token: ${{ secrets.TELEGRAM_TOKEN }}
-            message: ":warning: ⚠️ An error occurred during build."
+        with:
+          to: ${{ secrets.TELEGRAM_CHAT_ID }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: ":warning: ⚠️ An error occurred during build."
             
   sendFinalInformation:
     name: Send final information to Telegram
