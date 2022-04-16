@@ -42,3 +42,33 @@ jobs:
             git tag v$version
             git push origin v$version
           fi
+      - name: Get variables
+        id: variables
+        run: |
+          tags=$(git describe --tags --abbrev=0 $(git rev-list --tags --max-count=2))
+          arr=($tags)
+          last=${arr[0]}
+          penu=${arr[1]}
+          changes=$(git log $penu..$last --pretty=format:"%s")
+          changes="${changes//'%'/'%25'}"
+          changes="${changes//$'\n'/'%0A'}"
+          changes="${changes//$'\r'/'%0D'}"
+          chmod +x ./.github/workflows/getname.sh
+          projectname=$(./.github/workflows/getname.sh)
+          echo "::set-output name=last::$last"
+          echo "::set-output name=penu::$penu"
+          echo "::set-output name=changes::$changes"
+          echo "::set-output name=projectname::$projectname"
+      # Changes message
+      - uses: appleboy/telegram-action@master
+        if: inputs.development_build
+        with:
+          to: ${{ secrets.TELEGRAM_CHAT_ID }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: '#update #'${{ steps.variables.outputs.projectname}} ${{ steps.variables.outputs.penu }} -> ${{ steps.variables.outputs.last }}
+      - uses: appleboy/telegram-action@master
+        if: inputs.development_build
+        with:
+          to: ${{ secrets.TELEGRAM_CHAT_ID }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: ${{ steps.variables.outputs.changes }}
