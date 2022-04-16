@@ -47,11 +47,11 @@ jobs:
       # Normal message
       - uses: appleboy/telegram-action@master
         env:
-          message_verb: ${{ fromJSON('["#release", "#dev-build"]')[inputs.development_build] }}
-        with:
-          to: ${{ secrets.TELEGRAM_CHAT_ID }}
-          token: ${{ secrets.TELEGRAM_TOKEN }}
-          message: ${{ env.message_verb }} '#'${{ steps.variables.outputs.projectname }} ${{ steps.variables.outputs.lasttag }}.
+          message_verb: ${{ fromJSON('["#release", "#devbuild"]')[inputs.development_build] }}
+          with:
+            to: ${{ secrets.TELEGRAM_CHAT_ID }}
+            token: ${{ secrets.TELEGRAM_TOKEN }}
+            message: "${{ env.message_verb }} #${{ steps.variables.outputs.projectname }} ${{ steps.variables.outputs.lasttag }}."
 
   buildForSomePlatforms:
     name: Build for ${{ matrix.targetPlatform }} with itchio channel ${{ matrix.itch_channel }}
