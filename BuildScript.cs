@@ -1,5 +1,6 @@
 ﻿﻿﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using UnityEditor;
@@ -229,7 +230,7 @@ namespace UnityBuilderAction
                 process.Start();  // Try to start it, catching any exceptions if it fails
             } catch (Exception e) {
                 // For now just assume its failed cause it can't find git.
-                Debug.LogError("Git is not set-up correctly, required to be on PATH, and to be a git project.");
+                Console.WriteLine("Git is not set-up correctly, required to be on PATH, and to be a git project.");
                 throw e;
             }
 
@@ -246,7 +247,7 @@ namespace UnityBuilderAction
             }
             // Log any errors.
             if (errorOutput != "") {
-                Debug.LogError("Git Error: " + errorOutput);
+                Console.WriteLine("Git Error: " + errorOutput);
             }
 
             return output;  // Return the output from git.
