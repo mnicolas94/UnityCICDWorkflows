@@ -75,8 +75,6 @@ jobs:
           path: Library
           key: Library-${{ matrix.targetPlatform }}
           restore-keys: Library-
-      - name: work around permission issue
-        run: git config --global --add safe.directory /github/workspace
       - name: Get variables
         id: variables
         run: |
