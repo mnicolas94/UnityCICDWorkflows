@@ -258,7 +258,7 @@ namespace UnityBuilderAction
         private static void SetGithubSafeDirectory()
         {
             Console.WriteLine(Directory.GetCurrentDirectory());
-            string gitCommand = "config --global --add safe.directory /../../";
+            string gitCommand = "config --global --add safe.directory ./../../";
             var stdout = RunGitCommand(gitCommand);
             Console.WriteLine(stdout);
         }
