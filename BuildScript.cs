@@ -261,7 +261,7 @@ namespace UnityBuilderAction
             string exc = $"********************************\n" +
                          $"dir: {dir}\n" +
                          $"stdout: {stdout}\n" +
-                         $"********************************"
+                         $"********************************";
             throw new Exception(exc);
         }
     }
