@@ -241,8 +241,6 @@ namespace UnityBuilderAction
             process.WaitForExit();  // Make sure we wait till the process has fully finished.
             process.Close();        // Close the process ensuring it frees it resources.
 
-            Console.WriteLine($"output: {output}\nerrorOutput: {errorOutput}");
-            
             // Check for failure due to no git setup in the project itself or other fatal errors from git.
             if (output.Contains("fatal") || output == "no-git") {
                 throw new Exception($"Command: git {@gitCommand} Failed\noutput: {output}\nerrorOutput: {errorOutput}");
@@ -257,10 +255,14 @@ namespace UnityBuilderAction
         
         private static void SetGithubSafeDirectory()
         {
-            Console.WriteLine(Directory.GetCurrentDirectory());
             string gitCommand = "config --global --add safe.directory ./../../";
             var stdout = RunGitCommand(gitCommand);
-            Console.WriteLine(stdout);
+            string dir = Directory.GetCurrentDirectory();
+            string exc = $"********************************\n" +
+                         $"dir: {dir}\n" +
+                         $"stdout: {stdout}\n" +
+                         $"********************************"
+            throw new Exception(exc);
         }
     }
 }
