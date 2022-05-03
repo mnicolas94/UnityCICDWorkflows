@@ -255,7 +255,6 @@ namespace UnityBuilderAction
         
         private static void SetGithubSafeDirectory()
         {
-//            RunGitCommand("config --global --add safe.directory .");
             RunGitCommand("config --global --add safe.directory /github/workspace");
         }
     }

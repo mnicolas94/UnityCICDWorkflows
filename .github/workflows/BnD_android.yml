@@ -75,6 +75,17 @@ jobs:
           path: Library
           key: Library-${{ matrix.targetPlatform }}
           restore-keys: Library-
+      - name: Send file to telegram with MTProto API
+        uses: mnicolas94/telegram-file-uploader@v0.1
+        with:
+          session-name: ${{ secrets.TELEGRAM_SESSION }}
+          session-string: ${{ secrets.TELEGRAM_SESSION_STRING }}
+          api-id: ${{ secrets.TELEGRAM_API_ID }}
+          api-hash: ${{ secrets.TELEGRAM_API_HASH }}
+          bot-token: ${{ secrets.TELEGRAM_TOKEN }}
+          chat-id: ${{ secrets.secrets.TELEGRAM_CHAT_ID }}
+          file-path: .gitignore
+          message: Test message
       - name: Get variables
         id: variables
         run: |
@@ -117,13 +128,13 @@ jobs:
           ITCH_USER: ${{ secrets.ITCH_USER }}
           PACKAGE: ${{ steps.version_in_name.outputs.filename }}
           VERSION: ${{ steps.variables.outputs.version }}
-      - uses: appleboy/telegram-action@master
+      - name: Send file to telegram
+        uses: appleboy/telegram-action@master
         with:
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
           message: Build for ${{ matrix.itch_channel }} completed
           document: ${{ steps.version_in_name.outputs.filename }}
-          
       - name: Send error message if failed
         if: ${{ failure() }}
         uses: appleboy/telegram-action@master
