@@ -9,8 +9,6 @@ on:
     secrets:
       TELEGRAM_SESSION:
         required: true
-      TELEGRAM_SESSION_STRING:
-        required: true
       TELEGRAM_API_ID:
         required: true
       TELEGRAM_API_HASH:
@@ -83,17 +81,18 @@ jobs:
           path: Library
           key: Library-${{ matrix.targetPlatform }}
           restore-keys: Library-
+          
       - name: Send file to telegram with MTProto API
         uses: mnicolas94/telegram-file-uploader@main
         with:
           session-name: ${{ secrets.TELEGRAM_SESSION }}
-          session-string: ${{ secrets.TELEGRAM_SESSION_STRING }}
           api-id: ${{ secrets.TELEGRAM_API_ID }}
           api-hash: ${{ secrets.TELEGRAM_API_HASH }}
           bot-token: ${{ secrets.TELEGRAM_TOKEN }}
           chat-id: ${{ secrets.TELEGRAM_CHAT_ID }}
           file-path: .gitignore
           message: Test message
+          
       - name: Get variables
         id: variables
         run: |
