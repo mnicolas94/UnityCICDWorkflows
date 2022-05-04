@@ -130,9 +130,9 @@ jobs:
           filesize=$(stat -c%s "${{ steps.version_in_name.outputs.filename }}")
           echo "The build size is $filesize bytes."
           if (( filesize > maxsize )); then
-            echo "::set-output name=bigger::'true'"
+            echo "::set-output name=bigger::true"
           else
-            echo "::set-output name=bigger::'false'"
+            echo "::set-output name=bigger::false"
           fi
       - name: Send file to telegram
         if: ${{ steps.sizecheck.outputs.bigger == 'false' }}
