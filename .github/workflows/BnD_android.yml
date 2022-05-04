@@ -84,7 +84,7 @@ jobs:
           key: Library-${{ matrix.targetPlatform }}
           restore-keys: Library-
       - name: Send file to telegram with MTProto API
-        uses: mnicolas94/telegram-file-uploader@v0.1
+        uses: mnicolas94/telegram-file-uploader@main
         with:
           session-name: ${{ secrets.TELEGRAM_SESSION }}
           session-string: ${{ secrets.TELEGRAM_SESSION_STRING }}
