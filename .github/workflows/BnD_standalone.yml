@@ -126,7 +126,7 @@ jobs:
         id: sizecheck
         run: |
           maxsize=50000000
-          filesize=$(stat -c%s "${{ steps.version_in_name.outputs.filename }}")
+          filesize=$(stat -c%s "${{ steps.renaming.outputs.zipName }}")
           echo "The build size is $filesize bytes."
           if (( filesize > maxsize )); then
             echo "::set-output name=bigger::true"
