@@ -6,6 +6,10 @@ on:
       development_build:
         required: true
         type: boolean
+      cache_tgsession:
+        required: false
+        default: false
+        type: boolean
     secrets:
       TELEGRAM_SESSION:
         required: true
@@ -148,7 +152,7 @@ jobs:
           chat-id: ${{ secrets.TELEGRAM_CHAT_ID }}
           file-path: ${{ steps.renaming.outputs.zipName }}
           message: Build for ${{ matrix.itch_channel }} completed
-          cache-session: 'true'
+          cache-session: ${{ fromJSON('["false", "true"]')[inputs.cache_tgsession] }}
           reply-request: 'The build size for ${{ matrix.itch_channel }} is bigger than 50 MB. Please, reply to this message to give me permission to send you the file'
       - name: Send error message if failed
         if: ${{ failure() }}
