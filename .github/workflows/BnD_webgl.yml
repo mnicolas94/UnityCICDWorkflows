@@ -48,7 +48,7 @@ jobs:
           chat-id: ${{ secrets.TELEGRAM_CHAT_ID }}
 
   buildForSomePlatforms:
-    name: Build for ${{ env.platform }} with itchio channel ${{ env.itch_channel }}
+    name: Build for WebGL with itchio channel HTML5
     runs-on: ubuntu-latest
     env:
       dev_build_parameter: ${{ fromJSON('["", "-developmentBuild"]')[inputs.development_build] }}
