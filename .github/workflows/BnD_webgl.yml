@@ -68,12 +68,12 @@ jobs:
       - name: Get variables
         id: variables
         run: |
-          chmod +x ./.github/workflows/getname.sh
-          projectname=$(./.github/workflows/getname.sh)
           version=$(git describe --tags --abbrev=0 --match v[0-9]*)
           version=${version:1}
           echo "::set-output name=version::$version"
-          echo "::set-output name=projectname::$projectname"
+      - name: Get project name variable
+        id: project_name
+        uses: mnicolas94/UnityCICDWorkflows/.github/actions/get-project-name@v1-pre-13
       - name: Download build script
         run: |
           mkdir -p Assets/Editor
@@ -82,7 +82,7 @@ jobs:
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         with:
-          buildName: ${{ steps.variables.outputs.projectname }}
+          buildName: ${{ steps.project_name.outputs.project-name }}
           buildMethod: UnityBuilderAction.BuildScript.Build
           targetPlatform: ${{ env.platform }}
           versioning: Tag
@@ -93,7 +93,7 @@ jobs:
           CHANNEL: ${{ env.itch_channel_prefix }}${{ env.itch_channel }}
           ITCH_GAME: ${{ secrets.ITCH_GAME }}
           ITCH_USER: ${{ secrets.ITCH_USER }}
-          PACKAGE: build/${{ env.platform }}/${{ steps.variables.outputs.projectname }}
+          PACKAGE: build/${{ env.platform }}/${{ steps.project_name.outputs.project-name }}
           VERSION: ${{ steps.variables.outputs.version }}
       - name: Send error message if failed
         if: ${{ failure() }}

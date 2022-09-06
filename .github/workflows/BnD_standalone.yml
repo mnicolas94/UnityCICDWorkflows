@@ -78,12 +78,12 @@ jobs:
       - name: Get variables
         id: variables
         run: |
-          chmod +x ./.github/workflows/getname.sh
-          projectname=$(./.github/workflows/getname.sh)
           version=$(git describe --tags --abbrev=0 --match v[0-9]*)
           version=${version:1}
           echo "::set-output name=version::$version"
-          echo "::set-output name=projectname::$projectname"
+      - name: Get project name variable
+        id: project_name
+        uses: mnicolas94/UnityCICDWorkflows/.github/actions/get-project-name@v1-pre-13
       - name: Download build script
         run: |
           mkdir -p Assets/Editor
@@ -92,7 +92,7 @@ jobs:
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         with:
-          buildName: ${{ steps.variables.outputs.projectname }}
+          buildName: ${{ steps.project_name.outputs.project-name }}
           buildMethod: UnityBuilderAction.BuildScript.Build
           targetPlatform: ${{ matrix.targetPlatform }}
           versioning: Tag
@@ -102,8 +102,8 @@ jobs:
         run: |
           mkdir renamed
           cp -r "build/${{ matrix.targetPlatform }}" renamed
-          mv "renamed/${{ matrix.targetPlatform }}" "renamed/${{ steps.variables.outputs.projectname }}"
-          echo "::set-output name=zipName::${{ steps.variables.outputs.projectname }}-${{ matrix.itch_channel }}-${{ steps.variables.outputs.version }}.zip"
+          mv "renamed/${{ matrix.targetPlatform }}" "renamed/${{ steps.project_name.outputs.project-name }}"
+          echo "::set-output name=zipName::${{ steps.project_name.outputs.project-name }}-${{ matrix.itch_channel }}-${{ steps.variables.outputs.version }}.zip"
       - uses: josephbmanley/butler-publish-itchio-action@master
         env:
           BUTLER_CREDENTIALS: ${{ secrets.ITCH_BUTLER_CREDENTIALS }}

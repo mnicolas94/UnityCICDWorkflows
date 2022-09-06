@@ -58,18 +58,18 @@ jobs:
           changes="${changes//'%'/'%25'}"
           changes="${changes//$'\n'/'%0A'}"
           changes="${changes//$'\r'/'%0D'}"
-          chmod +x ./.github/workflows/getname.sh
-          projectname=$(./.github/workflows/getname.sh)
           echo "::set-output name=last::$last"
           echo "::set-output name=penu::$penu"
           echo "::set-output name=changes::$changes"
-          echo "::set-output name=projectname::$projectname"
+      - name: Get project name variable
+        id: project_name
+        uses: mnicolas94/UnityCICDWorkflows/.github/actions/get-project-name@v1-pre-13
       # Changes message
       - uses: appleboy/telegram-action@master
         with:
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
-          message: "#update #${{ steps.variables.outputs.projectname}} ${{ steps.variables.outputs.penu }} -> ${{ steps.variables.outputs.last }}"
+          message: "#update #${{ steps.project_name.outputs.project-name}} ${{ steps.variables.outputs.penu }} -> ${{ steps.variables.outputs.last }}"
       - uses: appleboy/telegram-action@master
         with:
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
