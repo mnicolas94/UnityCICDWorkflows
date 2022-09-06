@@ -28,6 +28,7 @@ on:
 
 env:
   platform: WebGL
+  itch_channel: HTML5
 
 jobs:
   sendTagAnnotations:
@@ -47,17 +48,13 @@ jobs:
           chat-id: ${{ secrets.TELEGRAM_CHAT_ID }}
 
   buildForSomePlatforms:
-    name: Build for ${{ matrix.targetPlatform }} with itchio channel ${{ matrix.itch_channel }}
+    name: Build for ${{ env.platform }} with itchio channel ${{ env.itch_channel }}
     runs-on: ubuntu-latest
     env:
       dev_build_parameter: ${{ fromJSON('["", "-developmentBuild"]')[inputs.development_build] }}
       itch_channel_prefix: ${{ fromJSON('["", "dev-"]')[inputs.development_build] }}
     strategy:
       fail-fast: false
-      matrix:
-        include:
-          - targetPlatform: WebGL
-            itch_channel: HTML5
     steps:
       - uses: actions/checkout@v2
         with:
@@ -66,7 +63,7 @@ jobs:
       - uses: actions/cache@v2
         with:
           path: Library
-          key: Library-${{ matrix.targetPlatform }}
+          key: Library-${{ env.platform }}
           restore-keys: Library-
       - name: Get variables
         id: variables
@@ -87,13 +84,13 @@ jobs:
         with:
           buildName: ${{ steps.variables.outputs.projectname }}
           buildMethod: UnityBuilderAction.BuildScript.Build
-          targetPlatform: ${{ matrix.targetPlatform }}
+          targetPlatform: ${{ env.platform }}
           versioning: Tag
           customParameters: ${{ env.dev_build_parameter }}
       - uses: josephbmanley/butler-publish-itchio-action@master
         env:
           BUTLER_CREDENTIALS: ${{ secrets.ITCH_BUTLER_CREDENTIALS }}
-          CHANNEL: ${{ env.itch_channel_prefix }}${{ matrix.itch_channel }}
+          CHANNEL: ${{ env.itch_channel_prefix }}${{ env.itch_channel }}
           ITCH_GAME: ${{ secrets.ITCH_GAME }}
           ITCH_USER: ${{ secrets.ITCH_USER }}
           PACKAGE: build/${{ env.platform }}/${{ steps.variables.outputs.projectname }}

@@ -39,22 +39,16 @@ jobs:
         with:
           fetch-depth: 0
           lfs: true
-      - name: Get variables
-        id: variables
-        run: |
-          chmod +x ./.github/workflows/getname.sh
-          projectname=$(./.github/workflows/getname.sh)
-          echo "::set-output name=lasttag::$(git describe --tags --abbrev=0)"
-          echo "::set-output name=projectname::$projectname"
-      # Normal message
-      - uses: appleboy/telegram-action@master
+      - name: Send notification message that build process started
+        uses: mnicolas94/UnityCICDWorkflows/.github/actions/initial-message@v1-pre-13
         env:
-          message_verb: ${{ fromJSON('["#release", "#devbuild"]')[inputs.development_build] }}
+          platform: Standalone
         with:
-          to: ${{ secrets.TELEGRAM_CHAT_ID }}
-          token: ${{ secrets.TELEGRAM_TOKEN }}
-          message: "${{ env.message_verb }} #${{ steps.variables.outputs.projectname }} ${{ steps.variables.outputs.lasttag }}."
-
+          development_build: ${{ inputs.development_build }}
+          platform: ${{ env.platform }}
+          bot-token: ${{ secrets.TELEGRAM_TOKEN }}
+          chat-id: ${{ secrets.TELEGRAM_CHAT_ID }}
+          
   buildForSomePlatforms:
     name: Build for ${{ matrix.targetPlatform }} with itchio channel ${{ matrix.itch_channel }}
     runs-on: ubuntu-latest

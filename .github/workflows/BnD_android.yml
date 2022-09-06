@@ -38,6 +38,10 @@ on:
       ITCH_USER:
         required: true
 
+env:
+  platform: Android
+  itch_channel: android
+
 jobs:
   sendTagAnnotations:
     name: Send information to Telegram
@@ -47,34 +51,22 @@ jobs:
         with:
           fetch-depth: 0
           lfs: true
-      - name: Get variables
-        id: variables
-        run: |
-          chmod +x ./.github/workflows/getname.sh
-          projectname=$(./.github/workflows/getname.sh)
-          echo "::set-output name=lasttag::$(git describe --tags --abbrev=0)"
-          echo "::set-output name=projectname::$projectname"
-      # Normal message
-      - uses: appleboy/telegram-action@master
-        env:
-          message_verb: ${{ fromJSON('["#release", "#devbuild"]')[inputs.development_build] }}
+      - name: Send notification message that build process started
+        uses: mnicolas94/UnityCICDWorkflows/.github/actions/initial-message@v1-pre-13
         with:
-          to: ${{ secrets.TELEGRAM_CHAT_ID }}
-          token: ${{ secrets.TELEGRAM_TOKEN }}
-          message: "${{ env.message_verb }} #${{ steps.variables.outputs.projectname }} ${{ steps.variables.outputs.lasttag }}."
+          development_build: ${{ inputs.development_build }}
+          platform: ${{ env.platform }}
+          bot-token: ${{ secrets.TELEGRAM_TOKEN }}
+          chat-id: ${{ secrets.TELEGRAM_CHAT_ID }}
 
   buildForSomePlatforms:
-    name: Build for ${{ matrix.targetPlatform }} with itchio channel ${{ matrix.itch_channel }}
+    name: Build for ${{ env.platform }} with itchio channel ${{ env.itch_channel }}
     runs-on: ubuntu-latest
     env:
       dev_build_parameter: ${{ fromJSON('["", "-developmentBuild"]')[inputs.development_build] }}
       itch_channel_prefix: ${{ fromJSON('["", "dev-"]')[inputs.development_build] }}
     strategy:
       fail-fast: false
-      matrix:
-        include:
-          - targetPlatform: Android
-            itch_channel: android
     steps:
       - uses: actions/checkout@v2
         with:
@@ -83,7 +75,7 @@ jobs:
       - uses: actions/cache@v2
         with:
           path: Library
-          key: Library-${{ matrix.targetPlatform }}
+          key: Library-${{ env.platform }}
           restore-keys: Library-
       - name: Get variables
         id: variables
@@ -104,7 +96,7 @@ jobs:
         with:
           buildName: ${{ steps.variables.outputs.projectname }}
           buildMethod: UnityBuilderAction.BuildScript.Build
-          targetPlatform: ${{ matrix.targetPlatform }}
+          targetPlatform: ${{ env.platform }}
           versioning: Tag
           androidKeystoreName: user.keystore
           androidKeystoreBase64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
@@ -122,7 +114,7 @@ jobs:
       - uses: josephbmanley/butler-publish-itchio-action@master
         env:
           BUTLER_CREDENTIALS: ${{ secrets.ITCH_BUTLER_CREDENTIALS }}
-          CHANNEL: ${{ env.itch_channel_prefix }}${{ matrix.itch_channel }}
+          CHANNEL: ${{ env.itch_channel_prefix }}${{ env.itch_channel }}
           ITCH_GAME: ${{ secrets.ITCH_GAME }}
           ITCH_USER: ${{ secrets.ITCH_USER }}
           PACKAGE: ${{ steps.version_in_name.outputs.filename }}
@@ -144,7 +136,7 @@ jobs:
         with:
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
-          message: Build for ${{ matrix.itch_channel }} completed
+          message: Build for ${{ env.itch_channel }} completed
           document: ${{ steps.version_in_name.outputs.filename }}
       - name: Send file to telegram with MTProto API
         if: ${{ steps.sizecheck.outputs.bigger == 'true' }}
@@ -156,7 +148,7 @@ jobs:
           bot-token: ${{ secrets.TELEGRAM_TOKEN }}
           chat-id: ${{ secrets.TELEGRAM_CHAT_ID }}
           file-path: ${{ steps.version_in_name.outputs.filename }}
-          message: Build for ${{ matrix.itch_channel }} completed
+          message: Build for ${{ env.itch_channel }} completed
           cache-session: ${{ fromJSON('["false", "true"]')[inputs.cache_tgsession] }}
           reply-request: 'The build size is bigger than 50 MB. Please, reply to this message to give me permission to send you the file'
       - name: Send error message if failed
