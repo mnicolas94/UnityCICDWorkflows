@@ -105,7 +105,7 @@ jobs:
           VERSION: ${{ steps.variables.outputs.version }}
       - uses: vimtor/action-zip@v1
         with:
-          files: build
+          files: build/WebGL/${{ steps.variables.outputs.$projectname }}
           dest: build.zip
       - name: Send file to telegram
         uses: appleboy/telegram-action@master
