@@ -6,10 +6,6 @@ on:
       development_build:
         required: true
         type: boolean
-      cache_tgsession:
-        required: false
-        default: false
-        type: boolean
     secrets:
       TELEGRAM_SESSION:
         required: true
