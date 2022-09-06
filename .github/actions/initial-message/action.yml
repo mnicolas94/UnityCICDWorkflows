@@ -16,19 +16,18 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Get version and project name variables
-      id: variables
+    - name: Get version variable
+      id: version
       shell: bash
       run: |
-        chmod +x ./.github/workflows/getname.sh
-        projectname=$(./.github/workflows/getname.sh)
         echo "::set-output name=lasttag::$(git describe --tags --abbrev=0)"
-        echo "::set-output name=projectname::$projectname"
-    # Normal message
+    - name: Get project name variable
+      id: project_name
+      uses: mnicolas94/UnityCICDWorkflows/.github/actions/get-project-name@v1-pre-13
     - uses: appleboy/telegram-action@master
       env:
         message_verb: ${{ fromJSON('["release", "devbuild"]')[inputs.development_build == 'true'] }}
       with:
         to: ${{ inputs.chat-id }}
         token: ${{ inputs.bot-token }}
-        message: "#${{ inputs.platform }} #${{ env.message_verb }} #${{ steps.variables.outputs.projectname }} ${{ steps.variables.outputs.lasttag }}."
+        message: "#${{ inputs.platform }} #${{ env.message_verb }} #${{ steps.project_name.outputs.projectname }} ${{ steps.version.outputs.lasttag }}."
