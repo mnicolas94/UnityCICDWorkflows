@@ -1,0 +1,34 @@
+﻿name: 'Send first notification message'
+description: 'Send message to telegram notifying some build process has started'
+inputs:
+  development_build:
+    description: 'The build is a development one'
+    required: true
+  platform:
+    description: "From which platform is the build"
+    required: true
+  bot-token:
+    description: 'Token of the bot that will send the file'
+    required: true
+  chat-id:
+    description: 'Id of the chat to send the file'
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Get variables
+      id: variables
+      shell: bash
+      run: |
+        chmod +x ./.github/workflows/getname.sh
+        projectname=$(./.github/workflows/getname.sh)
+        echo "::set-output name=lasttag::$(git describe --tags --abbrev=0)"
+        echo "::set-output name=projectname::$projectname"
+    # Normal message
+    - uses: appleboy/telegram-action@master
+      env:
+        message_verb: ${{ fromJSON('["release", "devbuild"]')[inputs.development_build] }}
+      with:
+        to: ${{ inputs.chat-id }}
+        token: ${{ inputs.bot-token }}
+        message: "#${{ inputs.platform }} #${{ env.message_verb }} #${{ steps.variables.outputs.projectname }} ${{ steps.variables.outputs.lasttag }}."
