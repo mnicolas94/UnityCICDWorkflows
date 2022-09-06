@@ -101,7 +101,7 @@ jobs:
           CHANNEL: ${{ env.itch_channel_prefix }}${{ matrix.itch_channel }}
           ITCH_GAME: ${{ secrets.ITCH_GAME }}
           ITCH_USER: ${{ secrets.ITCH_USER }}
-          PACKAGE: build
+          PACKAGE: build/WebGL/${{ steps.variables.outputs.$projectname }}
           VERSION: ${{ steps.variables.outputs.version }}
       - uses: vimtor/action-zip@v1
         with:
@@ -112,7 +112,7 @@ jobs:
         with:
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
-          message: Build for ${{ matrix.itch_channel }} completed
+          message: Build for WebGL completed
           document: build.zip
       - name: Send error message if failed
         if: ${{ failure() }}
