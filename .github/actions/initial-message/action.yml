@@ -27,7 +27,7 @@ runs:
     # Normal message
     - uses: appleboy/telegram-action@master
       env:
-        message_verb: ${{ fromJSON('["release", "devbuild"]')[inputs.development_build] }}
+        message_verb: ${{ fromJSON('["release", "devbuild"]')[inputs.development_build == 'true'] }}
       with:
         to: ${{ inputs.chat-id }}
         token: ${{ inputs.bot-token }}
