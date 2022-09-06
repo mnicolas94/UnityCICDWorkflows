@@ -43,8 +43,8 @@ jobs:
         with:
           development_build: ${{ inputs.development_build }}
           platform: ${{ env.platform }}
-          bot-token: secrets.TELEGRAM_TOKEN
-          chat-id: secrets.TELEGRAM_CHAT_ID
+          bot-token: ${{ secrets.TELEGRAM_TOKEN }}
+          chat-id: ${{ secrets.TELEGRAM_CHAT_ID }}
 
   buildForSomePlatforms:
     name: Build for ${{ matrix.targetPlatform }} with itchio channel ${{ matrix.itch_channel }}
