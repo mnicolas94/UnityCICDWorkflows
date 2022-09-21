@@ -1,4 +1,4 @@
-﻿﻿﻿using System;
+﻿﻿﻿﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -67,9 +67,19 @@ namespace UnityBuilderAction
 
         private static void BuildAddressables()
         {
-            var activePlayerDataBuilder = AddressableAssetSettingsDefaultObject.Settings.ActivePlayerDataBuilder;
-            AddressableAssetSettings.CleanPlayerContent(activePlayerDataBuilder);
-            AddressableAssetSettings.BuildPlayerContent();
+            var settings = AddressableAssetSettingsDefaultObject.Settings;
+#if UNITY_2021_2_OR_NEWER
+            var buildWithPlayer = settings.BuildAddressablesWithPlayerBuild;
+            bool shouldBuild = buildWithPlayer == AddressableAssetSettings.PlayerBuildOption.DoNotBuildWithPlayer;
+#else
+            bool shouldBuild = true;
+#endif
+            if (shouldBuild)
+            {
+                var activePlayerDataBuilder = settings.ActivePlayerDataBuilder;
+                AddressableAssetSettings.CleanPlayerContent(activePlayerDataBuilder);
+                AddressableAssetSettings.BuildPlayerContent();
+            }
         }
 
         private static Dictionary<string, string> GetValidatedOptions()
