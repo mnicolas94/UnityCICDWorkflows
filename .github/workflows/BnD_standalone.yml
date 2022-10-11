@@ -104,18 +104,18 @@ jobs:
           cp -r "build/${{ matrix.targetPlatform }}" renamed
           mv "renamed/${{ matrix.targetPlatform }}" "renamed/${{ steps.project_name.outputs.project-name }}"
           echo "::set-output name=zipName::${{ steps.project_name.outputs.project-name }}-${{ matrix.itch_channel }}-${{ steps.variables.outputs.version }}.zip"
+      - uses: vimtor/action-zip@v1
+        with:
+          files: renamed
+          dest: ${{ steps.renaming.outputs.zipName }}
       - uses: josephbmanley/butler-publish-itchio-action@master
         env:
           BUTLER_CREDENTIALS: ${{ secrets.ITCH_BUTLER_CREDENTIALS }}
           CHANNEL: ${{ env.itch_channel_prefix }}${{ matrix.itch_channel }}
           ITCH_GAME: ${{ secrets.ITCH_GAME }}
           ITCH_USER: ${{ secrets.ITCH_USER }}
-          PACKAGE: renamed
+          PACKAGE: ${{ steps.renaming.outputs.zipName }}
           VERSION: ${{ steps.variables.outputs.version }}
-      - uses: vimtor/action-zip@v1
-        with:
-          files: renamed
-          dest: ${{ steps.renaming.outputs.zipName }}
       - name: Check if file size is greater than 50 MB
         id: sizecheck
         run: |
