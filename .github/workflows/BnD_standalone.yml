@@ -70,20 +70,22 @@ jobs:
         with:
           fetch-depth: 0
           lfs: true
+      - name: Get project name variable
+        id: project_name
+        uses: mnicolas94/UnityCICDWorkflows/.github/actions/get-project-name@v1-pre-13
       - uses: actions/cache@v2
         with:
           path: Library
-          key: Library-${{ matrix.targetPlatform }}
-          restore-keys: Library-
+          key: Library-${{ steps.project_name.outputs.project-name }}-${{ matrix.targetPlatform }}
+          restore-keys: |
+            Library-${{ steps.project_name.outputs.project-name }}-
+            Library-
       - name: Get variables
         id: variables
         run: |
           version=$(git describe --tags --abbrev=0 --match v[0-9]*)
           version=${version:1}
           echo "::set-output name=version::$version"
-      - name: Get project name variable
-        id: project_name
-        uses: mnicolas94/UnityCICDWorkflows/.github/actions/get-project-name@v1-pre-13
       - name: Download build script
         run: |
           mkdir -p Assets/Editor
