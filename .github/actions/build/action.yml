@@ -1,0 +1,70 @@
+﻿name: 'Build'
+description: 'Build Unity project'
+inputs:
+  targetPlatform:
+    required: true
+    default: ''
+    description: 'Platform that the build should target.'
+  developmentBuild:
+    description: 'Whether is a development build or not'
+    required: true
+  androidAppBundle:
+    required: false
+    default: 'false'
+    description: 'Whether to build .aab instead of .apk'
+  androidKeystoreName:
+    required: false
+    default: ''
+    description: 'The android keystoreName'
+  androidKeystoreBase64:
+    required: false
+    default: ''
+    description: 'The base64 contents of the android keystore file'
+  androidKeystorePass:
+    required: false
+    default: ''
+    description: 'The android keystorePass'
+  androidKeyaliasName:
+    required: false
+    default: ''
+    description: 'The android keyaliasName'
+  androidKeyaliasPass:
+    required: false
+    default: ''
+    description: 'The android keyaliasPass'
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+        lfs: true
+    - name: Get project name variable
+      id: project_name
+      uses: mnicolas94/UnityCICDWorkflows/.github/actions/get-project-name@v1-pre-13
+    - uses: actions/cache@v2
+      with:
+        path: Library
+        key: Library-${{ steps.project_name.outputs.project-name }}-${{ inputs.targetPlatform }}
+        restore-keys: |
+          Library-${{ steps.project_name.outputs.project-name }}-
+          Library-
+    - name: Download build script
+      shell: bash
+      run: |
+        mkdir -p Assets/Editor
+        curl 'https://raw.githubusercontent.com/mnicolas94/UnityCICDWorkflows/main/BuildScript.cs' > Assets/Editor/BuildScript.cs
+    - uses: game-ci/unity-builder@v2
+      env:
+        UNITY_LICENSE: ${{ env.UNITY_LICENSE }}
+      with:
+        buildName: ${{ steps.project_name.outputs.project-name }}
+        buildMethod: UnityBuilderAction.BuildScript.Build
+        targetPlatform: ${{ inputs.platform }}
+        versioning: Tag
+        androidKeystoreName: ${{ inputs.androidKeystoreName }}
+        androidKeystoreBase64: ${{ inputs.androidKeystoreBase64 }}
+        androidKeystorePass: ${{ inputs.androidKeystorePass }}
+        androidKeyaliasName: ${{ inputs.androidKeyaliasName }}
+        androidKeyaliasPass: ${{ inputs.androidKeyaliasPass }}
+        customParameters: ${{ inputs.developmentBuild }}

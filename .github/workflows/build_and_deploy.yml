@@ -1,0 +1,43 @@
+﻿name: Build and deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      parameters_json:
+        type: string
+        required: true
+
+jobs:
+  build_and_deploy:
+    name: Build and deploy Unity project
+    runs-on: ubuntu-latest
+    steps:
+      - name: Parse json input
+        id: json
+        run: |
+          json=${{ fromJson(github.event.inputs.parameters_json) }}
+          echo "::set-output name=parameters::$json"
+          
+      # --- Build ---
+      - name: Build for Android
+        if: ${{ steps.json.outputs.parameters.targetPlatform }} == 'Android'
+        uses: mnicolas94/UnityCICDWorkflows/.github/actions/build@v1-pre-13
+        with:
+          targetPlatform: ${{ steps.json.outputs.parameters.targetPlatform }}
+          development_build: ${{ steps.json.outputs.parameters.developmentBuild }}
+          androidAppBundle: ${{ steps.json.outputs.parameters.platformVariables.appBundle }}
+          androidKeystoreName: ${{ secrets.ANDROID_KEYSTORE_NAME }}
+          androidKeystoreBase64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          androidKeystorePass: ${{ secrets.ANDROID_KEYSTORE_PASS }}
+          androidKeyaliasName: ${{ secrets.ANDROID_KEYALIAS_NAME }}
+          androidKeyaliasPass: ${{ secrets.ANDROID_KEYALIAS_PASS }}
+      - name: Build
+        if: ${{ steps.json.outputs.parameters.targetPlatform }} != 'Android'
+        uses: mnicolas94/UnityCICDWorkflows/.github/actions/build@v1-pre-13
+        with:
+          targetPlatform: ${{ steps.json.outputs.parameters.targetPlatform }}
+          development_build: ${{ steps.json.outputs.parameters.developmentBuild }}
+          
+      # --- Deploy ---
+      - name: Deploy
+        uses: <todo>
