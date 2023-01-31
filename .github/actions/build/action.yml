@@ -60,7 +60,7 @@ runs:
       with:
         buildName: ${{ steps.project_name.outputs.project-name }}
         buildMethod: UnityBuilderAction.BuildScript.Build
-        targetPlatform: ${{ inputs.platform }}
+        targetPlatform: ${{ inputs.targetPlatform }}
         versioning: Tag
         androidKeystoreName: ${{ inputs.androidKeystoreName }}
         androidKeystoreBase64: ${{ inputs.androidKeystoreBase64 }}
