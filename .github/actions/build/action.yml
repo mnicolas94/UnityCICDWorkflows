@@ -32,17 +32,26 @@ inputs:
     required: false
     default: ''
     description: 'The android keyaliasPass'
+outputs:
+  buildPath:
+    description: "The built file path"
+    value: # TODO
+  version:
+    value: $${{ steps.build.outputs.buildVersion }}
+    
 runs:
   using: "composite"
   steps:
-    - uses: actions/checkout@v2
+    - name: Checkout
+      uses: actions/checkout@v2
       with:
         fetch-depth: 0
         lfs: true
     - name: Get project name variable
       id: project_name
       uses: mnicolas94/UnityCICDWorkflows/.github/actions/get-project-name@v1-pre-13
-    - uses: actions/cache@v2
+    - name: Cache
+      uses: actions/cache@v2
       with:
         path: Library
         key: Library-${{ steps.project_name.outputs.project-name }}-${{ inputs.targetPlatform }}
@@ -54,7 +63,9 @@ runs:
       run: |
         mkdir -p Assets/Editor
         curl 'https://raw.githubusercontent.com/mnicolas94/UnityCICDWorkflows/main/BuildScript.cs' > Assets/Editor/BuildScript.cs
-    - uses: game-ci/unity-builder@v2
+    - name: Build step
+      uses: game-ci/unity-builder@v2
+      id: build
       env:
         UNITY_LICENSE: ${{ env.UNITY_LICENSE }}
       with:
@@ -68,3 +79,26 @@ runs:
         androidKeyaliasName: ${{ inputs.androidKeyaliasName }}
         androidKeyaliasPass: ${{ inputs.androidKeyaliasPass }}
         customParameters: ${{ inputs.developmentBuild }}
+    
+    # --- Get build path ---    
+    - name: Get platform display name
+      id: display_name
+      uses: mnicolas94/UnityCICDWorkflows/.github/actions/platform-display-name@v1-pre-13
+    # Standalone
+    - name: Rename build folder
+      id: renaming
+      run: |
+        mkdir renamed
+        cp -r "build/${{ inputs.targetPlatform }}" renamed
+        mv "renamed/${{ inputs.targetPlatform }}" "renamed/${{ steps.project_name.outputs.project-name }}"
+        echo "zipName=${{ steps.project_name.outputs.project-name }}-${{ steps.display_name.outputs.display_name_lower }}-${{ steps.build.outputs.buildVersion }}.zip" >> $GITHUB_OUTPUT
+    - uses: vimtor/action-zip@v1
+      with:
+        files: renamed
+        dest: ${{ steps.renaming.outputs.zipName }}
+    # WebGL
+    - uses: vimtor/action-zip@v1
+      with:
+        files: renamed
+        dest: ${{ steps.renaming.outputs.zipName }}
+    # Android
