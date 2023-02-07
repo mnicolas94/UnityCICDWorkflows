@@ -35,9 +35,9 @@ inputs:
 outputs:
   buildPath:
     description: "The built file path"
-    value: # TODO
+    value: ${{ steps.output_path.outputs.path }}
   version:
-    value: $${{ steps.build.outputs.buildVersion }}
+    value: ${{ steps.build.outputs.buildVersion }}
     
 runs:
   using: "composite"
@@ -86,21 +86,54 @@ runs:
       uses: mnicolas94/UnityCICDWorkflows/.github/actions/platform-display-name@v1-pre-13
       with:
         platform: ${{ inputs.targetPlatform }}
+    - name: Construct zip name (Standalone and WebGL)
+      id: zipName
+      shell: bash
+      run: |
+        echo "zipName=${{ steps.project_name.outputs.project-name }}-${{ steps.display_name.outputs.display_name_lower }}-${{ steps.build.outputs.buildVersion }}.zip" >> $GITHUB_OUTPUT
+
     # Standalone
     - name: Rename build folder
+      if: ${{ startsWith(inputs.targetPlatform, 'Standalone') }}
       id: renaming
+      shell: bash
       run: |
         mkdir renamed
         cp -r "build/${{ inputs.targetPlatform }}" renamed
         mv "renamed/${{ inputs.targetPlatform }}" "renamed/${{ steps.project_name.outputs.project-name }}"
-        echo "zipName=${{ steps.project_name.outputs.project-name }}-${{ steps.display_name.outputs.display_name_lower }}-${{ steps.build.outputs.buildVersion }}.zip" >> $GITHUB_OUTPUT
     - uses: vimtor/action-zip@v1
+      if: ${{ startsWith(inputs.targetPlatform, 'Standalone') }}
       with:
         files: renamed
-        dest: ${{ steps.renaming.outputs.zipName }}
+        dest: ${{ steps.zipName.outputs.zipName }}
     # WebGL
     - uses: vimtor/action-zip@v1
+      if: ${{ inputs.targetPlatform == 'WebGL' }}
       with:
-        files: renamed
-        dest: ${{ steps.renaming.outputs.zipName }}
+        files: build/${{ inputs.targetPlatform }}
+        dest: ${{ steps.zipName.outputs.zipName }}
     # Android
+    - name: Set Android output path
+      if: ${{ inputs.targetPlatform == 'Android' }}
+      id: android_path
+      env:
+        ext: ${{ fromJSON('[".apk", ".aab"]')[inputs.androidAppBundle == "true"] }}
+      shell: bash
+      run: |
+        echo 'path=build/Android/${{ steps.project_name.outputs.project-name }}${{ env.ext }}' >> $GITHUB_OUTPUT
+    
+    # Output
+    - name: Set the action's output
+      id: output_path
+      shell: bash
+      run: |
+        if [ ${{ inputs.targetPlatform == 'Android' }} == 'true' ]; then
+          echo 'path=${{ steps.android_path.outputs.path }}' >> $GITHUB_OUTPUT
+        elif [ ${{ inputs.targetPlatform == 'WebGL' }} == 'true' ]; then
+          echo 'path=${{ steps.zipName.outputs.zipName }}' >> $GITHUB_OUTPUT
+        elif [ ${{ startsWith(inputs.targetPlatform, 'Standalone') == 'true' }} ]; then
+          echo 'path=${{ steps.zipName.outputs.zipName }}' >> $GITHUB_OUTPUT
+        else
+          echo 'path=ERROR' >> $GITHUB_OUTPUT
+        fi
+        
