@@ -84,6 +84,8 @@ runs:
     - name: Get platform display name
       id: display_name
       uses: mnicolas94/UnityCICDWorkflows/.github/actions/platform-display-name@v1-pre-13
+      with:
+        platform: ${{ inputs.targetPlatform }}
     # Standalone
     - name: Rename build folder
       id: renaming

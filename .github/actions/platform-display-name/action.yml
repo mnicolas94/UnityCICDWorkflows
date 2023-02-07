@@ -1,13 +1,13 @@
-﻿name: 'todo'
-description: 'todo'
+﻿name: 'Get platform display name'
+description: 'Get a nice/display name for a GameCI platform'
 inputs:
   platform:
     required: true
 outputs:
   display_name:
-    value: steps.get_name.outputs.display_name
+    value: ${{ steps.get_name.outputs.display_name }}
   display_name_lower:
-    value: steps.get_name.outputs.display_name_lower
+    value: ${{ steps.get_name.outputs.display_name_lower }}
       
 runs:
   using: "composite"
