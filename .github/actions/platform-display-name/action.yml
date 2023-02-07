@@ -29,7 +29,3 @@ runs:
       run: |
         echo "display_name=${{ env[format('{0}', inputs.platform)] }}" >> $GITHUB_OUTPUT
         echo "display_name_lower=${{ env[format('{0}_lower', inputs.platform)] }}" >> $GITHUB_OUTPUT
-    - name: test
-      run: |
-        echo '${{ steps.get_name.outputs.display_name }}'
-        echo '${{ steps.get_name.outputs.display_name_lower }}'
