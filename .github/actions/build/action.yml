@@ -117,7 +117,7 @@ runs:
       if: ${{ inputs.targetPlatform == 'Android' }}
       id: android_path
       env:
-        ext: ${{ fromJSON('[".apk", ".aab"]')[inputs.androidAppBundle == "true"] }}
+        ext: ${{ fromJSON('[".apk", ".aab"]')[inputs.androidAppBundle == 'true'] }}
       shell: bash
       run: |
         echo 'path=build/Android/${{ steps.project_name.outputs.project-name }}${{ env.ext }}' >> $GITHUB_OUTPUT
