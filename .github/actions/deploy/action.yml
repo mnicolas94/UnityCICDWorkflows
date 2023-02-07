@@ -75,6 +75,7 @@ runs:
     # Play Store
     - name: Deploy to Play Store
       if: ${{ inputs.deployPlatform == 'PlayStore'}}
+      shell: bash
       run: |
         echo 'Deploy to Play Store'
 #      uses: r0adkll/upload-google-play@v1
