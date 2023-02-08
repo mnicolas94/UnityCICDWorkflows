@@ -14,35 +14,69 @@ inputs:
   telegram_message:
     required: false
     default: ''
+    description: 'TODO'
   TELEGRAM_SESSION:
     required: false
     default: ''
+    description: 'TODO'
   TELEGRAM_API_ID:
     required: false
     default: ''
+    description: 'TODO'
   TELEGRAM_API_HASH:
     required: false
     default: ''
+    description: 'TODO'
   TELEGRAM_TOKEN:
     required: false
     default: ''
+    description: 'TODO'
   TELEGRAM_CHAT_ID:
     required: false
     default: ''
+    description: 'TODO'
 # Itch.io
   itch_channel:
     required: false
     default: ''
+    description: 'TODO'
   ITCH_BUTLER_CREDENTIALS:
     required: false
     default: ''
+    description: 'TODO'
   ITCH_GAME:
     required: false
     default: ''
+    description: 'TODO'
   ITCH_USER:
     required: false
     default: ''
+    description: 'TODO'
   # Play Store
+  playstore_track:
+    required: false
+    default: ''
+    description: 'TODO'
+  playstore_status:
+    required: false
+    default: ''
+    description: 'TODO'
+  playstore_inAppUpdatePriority:
+    required: false
+    default: ''
+    description: 'TODO'
+  playstore_userFraction:
+    required: false
+    default: ''
+    description: 'TODO'
+  PLAY_STORE_SERVICE_ACCOUNT_JSON:
+    required: false
+    default: ''
+    description: 'TODO'
+  PLAY_STORE_PACKAGE_NAME:
+    required: false
+    default: ''
+    description: 'TODO'
 
 runs:
   using: "composite"
@@ -75,18 +109,16 @@ runs:
     # Play Store
     - name: Deploy to Play Store
       if: ${{ inputs.deployPlatform == 'PlayStore'}}
-      shell: bash
-      run: |
-        echo 'Deploy to Play Store'
-#      uses: r0adkll/upload-google-play@v1
-#      with:
-#        serviceAccountJsonPlainText: ${{ inputs.PLAY_STORE_SERVICE_ACCOUNT_JSON }}
-#        packageName: ${{ inputs.PLAY_STORE_PACKAGE_NAME }}
-#        releaseFiles: ${{ inputs.buildPath }}
-#        track: ${{ inputs.track }}
-#        status: ${{ inputs.status }}
-#        inAppUpdatePriority: ${{ inputs.inAppUpdatePriority }}
-#        userFraction: ${{ inputs.userFraction }}
-##        whatsNewDirectory: ${{ inputs. }}
-##        mappingFile: ${{ inputs. }}
-##        debugSymbols: ${{ inputs. }}
+      uses: r0adkll/upload-google-play@v1
+      with:
+        serviceAccountJsonPlainText: ${{ inputs.PLAY_STORE_SERVICE_ACCOUNT_JSON }}
+        packageName: ${{ inputs.PLAY_STORE_PACKAGE_NAME }}
+        releaseFiles: ${{ inputs.buildPath }}
+#        releaseName: ${{ inputs.version }}
+        track: ${{ inputs.playstore_track }}
+        status: ${{ inputs.playstore_status }}
+        inAppUpdatePriority: ${{ inputs.playstore_inAppUpdatePriority }}
+        userFraction: ${{ inputs.playstore_userFraction }}
+#        whatsNewDirectory: ${{ inputs. }}
+#        mappingFile: ${{ inputs. }}
+#        debugSymbols: ${{ inputs. }}
