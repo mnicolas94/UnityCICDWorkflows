@@ -38,7 +38,7 @@ outputs:
     value: ${{ steps.output_path.outputs.path }}
   version:
     value: ${{ steps.build.outputs.buildVersion }}
-    
+
 runs:
   using: "composite"
   steps:
@@ -73,6 +73,7 @@ runs:
         buildMethod: UnityBuilderAction.BuildScript.Build
         targetPlatform: ${{ inputs.targetPlatform }}
         versioning: Tag
+        androidAppBundle: ${{ inputs.androidAppBundle }}
         androidKeystoreName: ${{ inputs.androidKeystoreName }}
         androidKeystoreBase64: ${{ inputs.androidKeystoreBase64 }}
         androidKeystorePass: ${{ inputs.androidKeystorePass }}
