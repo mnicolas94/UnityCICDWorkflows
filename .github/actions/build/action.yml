@@ -68,6 +68,7 @@ runs:
       id: build
       env:
         UNITY_LICENSE: ${{ env.UNITY_LICENSE }}
+        dev_build_parameter: ${{ fromJSON('["", "-developmentBuild"]')[inputs.developmentBuild == 'true'] }}
       with:
         buildName: ${{ steps.project_name.outputs.project-name }}
         buildMethod: UnityBuilderAction.BuildScript.Build
@@ -79,7 +80,7 @@ runs:
         androidKeystorePass: ${{ inputs.androidKeystorePass }}
         androidKeyaliasName: ${{ inputs.androidKeyaliasName }}
         androidKeyaliasPass: ${{ inputs.androidKeyaliasPass }}
-        customParameters: ${{ inputs.developmentBuild }}
+        customParameters: ${{ env.dev_build_parameter }}
     
     # --- Get build path ---    
     - name: Get platform display name
