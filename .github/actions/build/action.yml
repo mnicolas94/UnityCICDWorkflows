@@ -123,12 +123,6 @@ runs:
       shell: bash
       run: |
         echo 'path=build/Android/${{ steps.project_name.outputs.project-name }}${{ env.ext }}' >> $GITHUB_OUTPUT
-        cd build
-        echo '--- build/'
-        ls
-        cd Android
-        echo '--- Android/'
-        ls
     
     # Output
     - name: Set the action's output

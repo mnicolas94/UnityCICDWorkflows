@@ -13,4 +13,4 @@ runs:
       run: |
         chmod +x ${{ github.action_path }}/getname.sh
         projectname=$(${{ github.action_path }}/getname.sh)
-        echo "::set-output name=projectname::$projectname"
+        echo 'projectname=$projectname' >> $GITHUB_OUTPUT

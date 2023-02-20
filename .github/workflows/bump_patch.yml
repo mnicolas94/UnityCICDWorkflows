@@ -58,9 +58,9 @@ jobs:
           changes="${changes//'%'/'%25'}"
           changes="${changes//$'\n'/'%0A'}"
           changes="${changes//$'\r'/'%0D'}"
-          echo "::set-output name=last::$last"
-          echo "::set-output name=penu::$penu"
-          echo "::set-output name=changes::$changes"
+          echo 'last=$last' >> $GITHUB_OUTPUT
+          echo 'penu=$penu' >> $GITHUB_OUTPUT
+          echo 'changes=$changes' >> $GITHUB_OUTPUT
       - name: Get project name variable
         id: project_name
         uses: mnicolas94/UnityCICDWorkflows/.github/actions/get-project-name@v1-pre-13
