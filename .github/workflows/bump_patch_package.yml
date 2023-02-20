@@ -40,11 +40,11 @@ jobs:
           echo version: $version
           if [ $(git describe --tags --exact-match HEAD) ]; then
             echo "Current commit already has tag. Can't bump version"
-            echo 'is_new=false' >> $GITHUB_OUTPUT
-            echo 'version=$oldversion' >> $GITHUB_OUTPUT
+            echo "is_new=false" >> $GITHUB_OUTPUT
+            echo "version=$oldversion" >> $GITHUB_OUTPUT
           else
-            echo 'is_new=true' >> $GITHUB_OUTPUT
-            echo 'version=$version' >> $GITHUB_OUTPUT
+            echo "is_new=true" >> $GITHUB_OUTPUT
+            echo "version=$version" >> $GITHUB_OUTPUT
           fi
           
       - uses: actions/setup-python@v2
