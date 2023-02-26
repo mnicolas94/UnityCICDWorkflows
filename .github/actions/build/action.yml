@@ -127,7 +127,7 @@ runs:
       shell: bash
       run: |
         oldfilename="build/Android/${{ steps.project_name.outputs.project-name }}${{ env.ext }}"
-        newfilename="build/Android/${{ steps.project_name.outputs.project-name }} ${{ steps.variables.outputs.version }}${{ env.ext }}"
+        newfilename="build/Android/${{ steps.project_name.outputs.project-name }} ${{ steps.build.outputs.buildVersion }}${{ env.ext }}"
         sudo mv "$oldfilename" "$newfilename"
         echo "path=$newfilename" >> $GITHUB_OUTPUT
     
