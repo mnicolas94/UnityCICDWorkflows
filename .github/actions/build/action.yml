@@ -38,6 +38,10 @@ outputs:
     value: ${{ steps.output_path.outputs.path }}
   version:
     value: ${{ steps.build.outputs.buildVersion }}
+    description: ''
+  projectName:
+    value: ${{ steps.project_name.outputs.project-name }}
+    description: ''
 
 runs:
   using: "composite"
