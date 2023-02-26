@@ -40,7 +40,7 @@ jobs:
           fetch-depth: 0
           lfs: true
       - name: Send notification message that build process started
-        uses: mnicolas94/UnityCICDWorkflows/.github/actions/initial-message@v1-pre-13
+        uses: mnicolas94/UnityCICDWorkflows/.github/actions/initial-message@v1
         env:
           platform: Standalone
         with:
@@ -72,7 +72,7 @@ jobs:
           lfs: true
       - name: Get project name variable
         id: project_name
-        uses: mnicolas94/UnityCICDWorkflows/.github/actions/get-project-name@v1-pre-13
+        uses: mnicolas94/UnityCICDWorkflows/.github/actions/get-project-name@v1
       - uses: actions/cache@v2
         with:
           path: Library

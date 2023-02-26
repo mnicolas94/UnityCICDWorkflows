@@ -53,7 +53,7 @@ runs:
         lfs: true
     - name: Get project name variable
       id: project_name
-      uses: mnicolas94/UnityCICDWorkflows/.github/actions/get-project-name@v1-pre-13
+      uses: mnicolas94/UnityCICDWorkflows/.github/actions/get-project-name@v1
     - name: Cache
       uses: actions/cache@v2
       with:
@@ -89,7 +89,7 @@ runs:
     # --- Get build path ---    
     - name: Get platform display name
       id: display_name
-      uses: mnicolas94/UnityCICDWorkflows/.github/actions/platform-display-name@v1-pre-13
+      uses: mnicolas94/UnityCICDWorkflows/.github/actions/platform-display-name@v1
       with:
         platform: ${{ inputs.targetPlatform }}
     - name: Construct zip name (Standalone and WebGL)
@@ -126,7 +126,10 @@ runs:
         ext: ${{ fromJSON('[".apk", ".aab"]')[inputs.androidAppBundle == 'true'] }}
       shell: bash
       run: |
-        echo 'path=build/Android/${{ steps.project_name.outputs.project-name }}${{ env.ext }}' >> $GITHUB_OUTPUT
+        oldfilename="build/Android/${{ steps.project_name.outputs.project-name }}${{ env.ext }}"
+        newfilename="build/Android/${{ steps.project_name.outputs.project-name }} ${{ steps.variables.outputs.version }}${{ env.ext }}"
+        sudo mv "$oldfilename" "$newfilename"
+        echo "path=$newfilename" >> $GITHUB_OUTPUT
     
     # Output
     - name: Set the action's output

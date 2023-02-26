@@ -63,7 +63,7 @@ jobs:
           echo "changes=$changes" >> $GITHUB_OUTPUT
       - name: Get project name variable
         id: project_name
-        uses: mnicolas94/UnityCICDWorkflows/.github/actions/get-project-name@v1-pre-13
+        uses: mnicolas94/UnityCICDWorkflows/.github/actions/get-project-name@v1
       # Changes message
       - uses: appleboy/telegram-action@master
         with:
