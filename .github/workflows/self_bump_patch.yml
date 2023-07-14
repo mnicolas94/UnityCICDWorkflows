@@ -1,12 +1,7 @@
 name: Bump version patch
 
 on:
-  workflow_call:
-    secrets:
-      TELEGRAM_CHAT_ID:
-        required: true
-      TELEGRAM_TOKEN:
-        required: true
+  push:
         
 jobs:
   bumpPatch:
@@ -47,31 +42,3 @@ jobs:
             git tag v$version
             git push origin v$version
           fi
-      - name: Get variables
-        id: variables
-        run: |
-          tags=$(git describe --tags --abbrev=0 --always $(git rev-list --tags --max-count=2))
-          arr=($tags)
-          last=${arr[0]}
-          penu=${arr[1]}
-          changes=$(git log $penu..$last --pretty=format:"%s")
-          changes="${changes//'%'/'%25'}"
-          changes="${changes//$'\n'/'%0A'}"
-          changes="${changes//$'\r'/'%0D'}"
-          echo "last=$last" >> $GITHUB_OUTPUT
-          echo "penu=$penu" >> $GITHUB_OUTPUT
-          echo "changes=$changes" >> $GITHUB_OUTPUT
-      - name: Get project name variable
-        id: project_name
-        uses: mnicolas94/UnityCICDWorkflows/.github/actions/get-project-name@v1
-      # Changes message
-      - uses: appleboy/telegram-action@master
-        with:
-          to: ${{ secrets.TELEGRAM_CHAT_ID }}
-          token: ${{ secrets.TELEGRAM_TOKEN }}
-          message: "#update #${{ steps.project_name.outputs.project-name}} ${{ steps.variables.outputs.penu }} -> ${{ steps.variables.outputs.last }}"
-      - uses: appleboy/telegram-action@master
-        with:
-          to: ${{ secrets.TELEGRAM_CHAT_ID }}
-          token: ${{ secrets.TELEGRAM_TOKEN }}
-          message: ${{ steps.variables.outputs.changes }}
