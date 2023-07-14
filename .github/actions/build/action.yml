@@ -12,14 +12,14 @@ inputs:
     required: false
     default: 'false'
     description: 'Whether to build .aab instead of .apk'
-  androidKeystoreName:
-    required: false
-    default: ''
-    description: 'The android keystoreName'
   androidKeystoreBase64:
     required: false
     default: ''
     description: 'The base64 contents of the android keystore file'
+  androidKeystoreName:
+    required: false
+    default: ''
+    description: 'The android keystoreName'
   androidKeystorePass:
     required: false
     default: ''
