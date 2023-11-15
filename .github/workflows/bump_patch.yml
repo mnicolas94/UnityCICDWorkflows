@@ -59,18 +59,18 @@ jobs:
           changes="${changes//$'\r'/'%0D'}"
           echo "last=$last" >> $GITHUB_OUTPUT
           echo "penu=$penu" >> $GITHUB_OUTPUT
-          echo "changes=$changes" >> $GITHUB_OUTPUT
+          {
+            echo 'changes<<EOF'
+            echo $changes
+            echo EOF
+          } >> $GITHUB_OUTPUT
       - name: Get project name variable
         id: project_name
-        uses: mnicolas94/UnityCICDWorkflows/.github/actions/get-project-name@v1
+        uses: mnicolas94/facticus-deploy/.github/actions/get-project-name@main
       # Changes message
       - uses: appleboy/telegram-action@master
         with:
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
-          message: "#update #${{ steps.project_name.outputs.project-name}} ${{ steps.variables.outputs.penu }} -> ${{ steps.variables.outputs.last }}"
-      - uses: appleboy/telegram-action@master
-        with:
-          to: ${{ secrets.TELEGRAM_CHAT_ID }}
-          token: ${{ secrets.TELEGRAM_TOKEN }}
-          message: ${{ steps.variables.outputs.changes }}
+          message: "#update #${{ steps.project_name.outputs.projectNameNoSpaces}} ${{ steps.variables.outputs.penu }} -> ${{ steps.variables.outputs.last }}\n\n${{ steps.variables.outputs.changes }}"
+      
